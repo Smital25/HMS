@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification System</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 100%;
+            height: 100vh;
+            background: white;
+            padding: 40px;
+            box-sizing: border-box;
+            text-align: center;
+            overflow-y: auto;
+        }
+        .navbar {
+            width: 100%;
+            background-color: #007bff;
+            padding: 15px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+        .navbar .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        h2, h3 {
+            color: #333;
+            margin-top: 60px;
+        }
+        .notification {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            position: relative;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .admin-section {
+            margin-top: 20px;
+            text-align: left;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: none;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .notification-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <span class="logo">📌 Notification System</span>
+        <div>
+            <a href="#">Home</a>
+            <a href="#">Dashboard</a>
+            <a href="#">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>📢 Notifications</h2>
+        <div id="notifications" class="notification-list"></div>
+        
+        <div class="admin-section">
+            <h3>🛠 Admin Panel</h3>
+            <textarea id="notificationInput" rows="3" placeholder="Enter notification..."></textarea>
+            <br>
+            <button onclick="postNotification()">Post Notification</button>
+        </div>
+    </div>
+
+    <script>
+        function postNotification() {
+            let input = document.getElementById("notificationInput").value;
+            if (input.trim() !== "") {
+                let notifDiv = document.createElement("div");
+                notifDiv.className = "notification";
+                notifDiv.innerHTML = `<strong>New Notification:</strong> ${input} <span class="close-btn" onclick="this.parentElement.style.display='none'">&times;</span>`;
+                document.getElementById("notifications").appendChild(notifDiv);
+                document.getElementById("notificationInput").value = "";
+            }
+        }
+    </script>
+</body>
+</html>
