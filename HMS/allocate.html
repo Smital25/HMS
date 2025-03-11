@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocate Rooms</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+        .manage-button {
+            position:fixed;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: auto;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Allocate Room</h2>
+    <div class="container">
+        <input type="text" id="studentName" placeholder="Student Name">
+        <input type="text" id="usn" placeholder="USN">
+        <select id="roomType" onchange="populateRoomIds()">
+            <option value="" disabled selected>Select Room Type</option>
+            <option value="2">2 Sharing</option>
+            <option value="3">3 Sharing</option>
+            <option value="4">4 Sharing</option>
+        </select>
+        <select id="roomId">
+            <option value="" disabled selected>Select Room ID</option>
+        </select>
+        <button onclick="allocateRoom()">Allocate</button>
+        <p id="message"></p>
+        <a href="main.html" class="back-link">Back to Dashboard</a>
+    </div>
+
+    <script>
+        function populateRoomIds() {
+            const roomType = document.getElementById("roomType").value;
+            const roomIdSelect = document.getElementById("roomId");
+            roomIdSelect.innerHTML = '<option value="" disabled selected>Select Room ID</option>';
+            
+            let roomIds = [];
+            if (roomType === "2") {
+                roomIds = ["201", "202", "203", "204"];
+            } else if (roomType === "3") {
+                roomIds = ["301", "302", "303", "304"];
+            } else if (roomType === "4") {
+                roomIds = ["401", "402", "403", "404"];
+            }
+            
+            roomIds.forEach(id => {
+                let option = document.createElement("option");
+                option.value = id;
+                option.textContent = id;
+                roomIdSelect.appendChild(option);
+            });
+        }
+
+        function allocateRoom() {
+            const name = document.getElementById("studentName").value;
+            const usn = document.getElementById("usn").value;
+            const roomType = document.getElementById("roomType").value;
+            const roomId = document.getElementById("roomId").value;
+            
+            if (name && usn && roomType && roomId) {
+                const successMessage = `Room ${roomId} allocated successfully for ${name} (USN: ${usn}) in ${roomType}-sharing room.`;
+                document.getElementById("message").innerText = successMessage;
+                alert(successMessage);
+
+                // Clear input fields
+                document.getElementById("studentName").value = "";
+                document.getElementById("usn").value = "";
+                document.getElementById("roomType").selectedIndex = 0;
+                document.getElementById("roomId").innerHTML = '<option value="" disabled selected>Select Room ID</option>';
+            } else {
+                alert("Please fill all fields.");
+            }
+        }
+    </script>
+</body>
+</html>
