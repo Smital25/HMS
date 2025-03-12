@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocate Rooms</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: auto;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Allocate Room</h2>
+    <div class="container">
+        <input type="text" id="studentName" placeholder="Student Name">
+        <input type="text" id="usn" placeholder="USN">
+
+        <select id="gender" onchange="fetchAvailableHostels()">
+            <option value="" disabled selected>Select Gender</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+        </select>
+
+        <select id="hostel" onchange="fetchAvailableRoomTypes()">
+            <option value="" disabled selected>Select Hostel</option>
+        </select>
+
+        <select id="roomType" onchange="fetchAvailableRooms()">
+            <option value="" disabled selected>Select Room Type</option>
+        </select>
+
+        <select id="roomNumber">
+            <option value="" disabled selected>Select Room Number</option>
+        </select>
+
+        <button onclick="allocateRoom()">Allocate</button>
+        <p id="message"></p>
+        <a href="/main">Go to Dashboard</a>
+    </div>
+
+    <script>
+        function fetchAvailableHostels() {
+            const gender = document.getElementById("gender").value;
+            const hostelSelect = document.getElementById("hostel");
+
+            hostelSelect.innerHTML = '<option value="" disabled selected>Select Hostel</option>';
+
+            let hostels = [];
+            if (gender === "Female") {
+                hostels = ["Hemavati", "Sharavati"];
+            } else if (gender === "Male") {
+                hostels = ["Narmada", "Shalmala"];
+            }
+
+            hostels.forEach(hostel => {
+                let option = document.createElement("option");
+                option.value = hostel;
+                option.textContent = hostel;
+                hostelSelect.appendChild(option);
+            });
+
+            fetchAvailableRoomTypes();
+        }
+
+        function fetchAvailableRoomTypes() {
+            const hostel = document.getElementById("hostel").value;
+            const roomTypeSelect = document.getElementById("roomType");
+
+            roomTypeSelect.innerHTML = '<option value="" disabled selected>Select Room Type</option>';
+
+            if (!hostel) return;
+
+            fetch(`/get_room_types?hostel=${hostel}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.roomTypes.forEach(type => {
+                        let option = document.createElement("option");
+                        option.value = type;
+                        option.textContent = type + " Sharing";
+                        roomTypeSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error fetching room types:", error));
+        }
+
+        function fetchAvailableRooms() {
+            const hostel = document.getElementById("hostel").value;
+            const roomType = document.getElementById("roomType").value;
+            const roomNumberSelect = document.getElementById("roomNumber");
+
+            roomNumberSelect.innerHTML = '<option value="" disabled selected>Select Room Number</option>';
+
+            if (!hostel || !roomType) return;
+
+            fetch(`/get_available_rooms?hostel=${hostel}&roomType=${roomType}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.rooms.forEach(room => {
+                        let option = document.createElement("option");
+                        option.value = room.roomNumber;
+                        option.textContent = room.roomNumber;
+                        roomNumberSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error fetching rooms:", error));
+        }
+
+        function allocateRoom() {
+            const name = document.getElementById("studentName").value;
+            const usn = document.getElementById("usn").value;
+            const gender = document.getElementById("gender").value;
+            const hostel = document.getElementById("hostel").value;
+            const roomType = document.getElementById("roomType").value;
+            const roomNumber = document.getElementById("roomNumber").value;
+
+            if (name && usn && gender && hostel && roomType && roomNumber) {
+                fetch("/allocate_room", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        studentName: name,
+                        usn: usn,
+                        gender: gender,
+                        hostel: hostel,
+                        roomType: roomType,
+                        roomNumber: roomNumber
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("message").innerText = data.message;
+                    alert(data.message);
+                    document.getElementById("studentName").value = "";
+                    document.getElementById("usn").value = "";
+                    document.getElementById("gender").selectedIndex = 0;
+                    document.getElementById("hostel").innerHTML = '<option value="" disabled selected>Select Hostel</option>';
+                    document.getElementById("roomType").innerHTML = '<option value="" disabled selected>Select Room Type</option>';
+                    document.getElementById("roomNumber").innerHTML = '<option value="" disabled selected>Select Room Number</option>';
+                })
+                .catch(error => console.error("Error:", error));
+            } else {
+                alert("Please fill all fields.");
+            }
+        }
+    </script>
+</body>
+</html>
