@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        /* ✅ General Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #e3f2fd, #90caf9);
+            text-align: center;
+        }
+
+        /* ✅ Navbar */
+        .navbar {
+            background: linear-gradient(to right, #007bff, #0056b3);
+            padding: 15px;
+            text-align: right;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 18px;
+            font-weight: bold;
+            margin-right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+        }
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        /* ✅ Dashboard Title */
+        .dashboard-title {
+            margin-top: 30px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #004c8c;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ✅ Card Container - Column Layout */
+        .card-container {
+            display: flex;
+            flex-direction: column;  /* ✅ Stack cards vertically */
+            align-items: center;  /* ✅ Center the cards */
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        /* ✅ Individual Card */
+        .card {
+            background: white;
+            padding: 30px;
+            width: 300px;  /* ✅ Fixed width */
+            border-radius: 15px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ✅ Card Background Hover Effect */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0, 123, 255, 0.1), rgba(0, 0, 255, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        /* ✅ Card Icons */
+        .card i {
+            font-size: 55px;
+            margin-bottom: 15px;
+            color: #007bff;
+        }
+
+        /* ✅ Card Titles */
+        .card h3 {
+            font-size: 20px;
+            color: #333;
+            margin: 0;
+        }
+
+        /* ✅ Responsive Design */
+        @media (max-width: 768px) {
+            .card-container {
+                align-items: center;
+            }
+            .card {
+                width: 90%;
+            }
+        }
+
+    </style>
+
+    <!-- ✅ FontAwesome for Icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <!-- <div class="navbar">
+        <a href="/admin_dashboard">🏠 Back to Dashboard</a>
+        <a href="/logout">🚪 Logout</a>
+    </div> -->
+
+    <!-- ✅ Navigation Bar -->
+    <div class="navbar">
+        <a href="/logout">🚪 Logout</a>
+    </div>
+
+    <!-- ✅ Dashboard Title -->
+    <h1 class="dashboard-title">Admin Dashboard</h1>
+
+    <!-- ✅ Cards Section -->
+    <div class="card-container">
+        
+        <!-- ✅ Room Management -->
+        <div class="card" onclick="navigateTo('/main')">
+            <h3>Room Management</h3>
+        </div>
+
+        <!-- ✅ Attendance Records -->
+        <div class="card" onclick="navigateTo('/view_attendance')">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>View Attendance</h3>
+        </div>
+
+        <!-- ✅ Notifications -->
+        <div class="card" onclick="navigateTo('/notification')">
+            <i class="fas fa-bell"></i>
+            <h3>Manage Notifications</h3>
+        </div>
+
+        <!-- ✅ Leave Requests -->
+        <div class="card" onclick="navigateTo('/ladmin_dashboard')">
+            <i class="fas fa-calendar-alt"></i>
+            <h3>leave Letter</h3>
+        </div>
+
+    </div>
+
+    <script>
+        // ✅ Function to Navigate to Pages
+        function navigateTo(url) {
+            window.location.href = url;
+        }
+    </script>
+
+</body>
+</html>
