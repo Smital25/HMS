@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Request</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            margin: 20px;
+        }
+
+        /* Form */
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            width: 300px;
+        }
+
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        form button {
+            width: 100%;
+            padding: 10px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+
+        h2 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            color: green;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ms-auto">
+        <button class="btn-dashboard" onclick="location.href='/student_dashboard'">Back to Dashboard</button>
+    </div>
+    <h2>Leave Request Form</h2>
+    <form method="POST" action="/leave_request">
+        <input type="hidden" id="student_id" name="student_id" value="{{ student_id }}">
+        <label for="room_id">Room ID:</label>
+        <input type="text" id="room_id" name="room_id" required><br><br>
+        
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required><br><br>
+        
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" required><br><br>
+        
+        <label for="reason">Reason for Leave:</label>
+        <textarea id="reason" name="reason" required></textarea><br><br>
+    
+        <button type="submit">Submit Leave Request</button>
+    </form>
+    <script>
+        document.getElementById("leaveForm").addEventListener("submit", function(event) {
+            const roomId = document.getElementById("room_id").value.trim();
+            const startDate = document.getElementById("start_date").value;
+            const endDate = document.getElementById("end_date").value;
+            const reason = document.getElementById("reason").value.trim();
+            const currentDate = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+
+            // Validate Room ID (alphanumeric)
+            if (!/^[a-zA-Z0-9]+$/.test(roomId)) {
+                alert("Room ID must be alphanumeric.");
+                event.preventDefault();
+                return;
+            }
+
+            // Validate Start Date (not in the past)
+            if (startDate < currentDate) {
+                alert("Start Date cannot be in the past.");
+                event.preventDefault();
+                return;
+            }
+
+            // Validate End Date (not before Start Date)
+            if (endDate < startDate) {
+                alert("End Date cannot be earlier than Start Date.");
+                event.preventDefault();
+                return;
+            }
+
+            // Validate Reason (minimum 10 characters)
+            if (reason.length < 10) {
+                alert("Reason for Leave must be at least 10 characters long.");
+                event.preventDefault();
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharavati Hostel Management</title>
+    <style>
+        /* ✅ Fix Navbar Layout */
+        .navbar {
+            background: linear-gradient(to right, #3c8ca0, #2575fc);
+            color: white;
+            padding: 15px 20px;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;  /* ✅ Fixes overlap */
+            align-items: center;  /* ✅ Centers items */
+            flex-wrap: wrap;  /* ✅ Prevents overlap */
+        }
+
+        /* ✅ Ensure title does not overlap */
+        .navbar h1 {
+            font-size: 20px;
+            flex-grow: 1;  /* ✅ Pushes items apart */
+            margin: 0;
+            text-align: left;
+        }
+
+        /* ✅ Ensure nav links are spaced properly */
+        .nav-links {
+            display: flex;
+            gap: 20px; /* ✅ Adds spacing between links */
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background 0.3s ease-in-out;
+            font-size: 18px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+            margin-top: 40px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .options a {
+            display: block;
+            padding: 15px;
+            background: linear-gradient(to right, #3c8ca0, #3c8ca0);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .options a:hover {
+            background: linear-gradient(to right, #3c8ca0, #2fd2ff);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- ✅ Fixed Navbar -->
+    <div class="navbar">
+        <h1>Shri Dharmastala Manjunatheshwar College Of Engineering and Technology</h1>
+        <div class="nav-links">
+            <a href="/admin_dashboard" class="nav-link">📊 Dashboard</a>
+            <a href="/homepage" class="nav-link">🏠 Home</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Welcome to Hostel Room Management System</h2>
+        <p>Select an option below:</p>
+
+        <div class="options">
+            <a href="/allocate">Allocate Rooms</a>
+            <a href="/swap">Swap Rooms</a>
+            <a href="/view">View Rooms</a>
+            <a href="/manage">Manage Rooms</a>
+        </div>
+    </div>
+</body>
+</html>

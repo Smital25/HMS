@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Attendance Records</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative; /* Added position relative for absolute child */
+        }
+
+        .navbar p {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .navbar a {
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Container */
+        .container {
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white; /* Ensure the table has a white background */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for the table */
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        /* Dashboard Button */
+        .navbar a.dashboard-button {
+            position: absolute;
+            right: 20px; /* Aligns the button to the right side */
+            top: 0; /* Aligns the button to the top */
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .navbar a.dashboard-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <p>Attendance Records</p>
+        <a href="/admin_dashboard" class="dashboard-button">Dashboard</a>
+    </div>
+
+    <!-- Attendance Records -->
+    <div class="container">
+        <h2>Attendance Records</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>MAC Address</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="attendance_table"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Fetch attendance records from the backend
+        fetch('/view_attendance/attendance_record')
+            .then(response => response.json())
+            .then(data => {
+                let tableBody = document.getElementById("attendance_table");
+                data.forEach(record => {
+                    let row = `<tr>
+                        <td>${record.student_name}</td>
+                        <td>${record.student_id}</td>
+                        <td>${record.mac_address}</td>
+                        <td>${record.status}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
