@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Attendance</title>
+    <style>
+        /* Reset some default styles */
+        body, h2, p {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f1f1f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Main Container */
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Heading Styling */
+        h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Input Fields Styling */
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* Input Focus Styling */
+        input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Button Styling */
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        /* Button Hover Effect */
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Response Text Styling */
+        #response {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #28a745;
+        }
+
+        /* Secondary Buttons */
+        .secondary-button {
+            background-color: #6c757d;
+            width: 100%;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Secondary Button Hover Effect */
+        .secondary-button:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Mark Attendance</h2>
+        <input type="text" id="student_name" placeholder="Enter Name">
+        <input type="text" id="student_id" placeholder="Enter ID">
+        <button onclick="markAttendance()">Submit</button>
+        <p id="response"></p>
+        
+        <button class="secondary-button" onclick="window.location.href='/view_attendance'">View Attendance</button>
+        <button class="secondary-button" onclick="window.location.href='/student_dashboard'">Back to Dashboard</button>
+    </div>
+
+    <script>
+    function markAttendance() {
+        let student_name = document.getElementById("student_name").value;
+        let student_id = document.getElementById("student_id").value;
+
+        if (!student_name || !student_id) {
+            alert("Please enter name and ID");
+            return;
+        }
+
+        fetch('/mark_attendance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_name, student_id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("response").innerText = data.message;
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Fetch attendance records
+    fetch('/view_attendance/attendance_record')
+        .then(response => response.json())
+        .then(data => {
+            let tableBody = document.getElementById("attendance_table");
+            data.forEach(record => {
+                let row = `<tr>
+                    <td>${record.student_name}</td>
+                    <td>${record.student_id}</td>
+                    <td>${record.date}</td>
+                    <td>${record.time}</td>
+                    <td>${record.status}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        })
+        .catch(error => console.error('Error:', error));
+</script>
+
+</body>
+</html>

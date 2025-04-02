@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+       <style>
+        /* General Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: linear-gradient(90deg, #007bff, #d7ecf0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar .btn-custom {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: bold;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: 0.3s ease;
+            background: #28a745;
+        }
+
+        .navbar .btn-custom:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .navbar .btn-signup {
+            background:  #007bff;
+        }
+
+        .navbar .btn-signup:hover {
+            background:  #007bff;
+        }
+
+        /* Hero Section Styles */
+        .hero {
+            background: linear-gradient(135deg,  #007bff, #000428);
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 50px 0;
+            text-align: center;
+        }
+
+        .section h2 {
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .card {
+            background: white;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: linear-gradient(90deg, #003366, #002244);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">Shri Dharmastala Manjunatheshwar College of Engineering and Technology</a>
+            <div class="ms-auto">
+                <button class="btn-custom btn-login" onclick="location.href='/login'">Login</button>
+                <button class="btn-custom btn-signup" onclick="location.href='/register'">Signup</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="text-center">
+            <h1>Welcome to Our Hostel Management System 🏠</h1>
+            <p>Safe, Secure & Comfortable Living for Students</p>
+        </div>
+    </section>
+
+    <section class="section container">
+        <h2 class="text-center mb-4">Facilities Provided</h2>
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">☕ Tea & Coffee</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">🚿 Hot Showers</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">📶 Free Wi-Fi</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">🧺 Laundry Services</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">❄️ Air Conditioning</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">🍳 Common Kitchen</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">🔐 Lockers</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">🧴 Ironing Facility</div>
+            </div>
+        </div>
+    </section>
+<!-- Notifications Section -->
+<section class="container mb-5">
+    <h2 class="text-center mb-4">📢 Latest Notifications</h2>
+    <div id="notifications"></div>
+</section>
+
+    <section class="section bg-light">
+        <div class="container">
+            <h2 class="text-center mb-4">List of Hostels</h2>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Sharavati Hostel</li>
+                <li class="list-group-item">Netravati Hostel</li>
+                <li class="list-group-item">Krishna Hostel</li>
+                <li class="list-group-item">Cauvery Hostel</li>
+                <li class="list-group-item">Ganga Hostel</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="section container">
+        <h2 class="text-center mb-4">Our Team</h2>
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">👩‍💼 Param - Founder <br>📞 +1 123-456-7890</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">👨‍💼 Sukku - Receptionist <br>📞 +1 987-654-3210</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">👩‍🍳  Riya - Chef <br>📞 +1 456-789-1234</div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card p-3">🧹 Savitri - Room Attendant <br>📞 +1 321-654-9870</div>
+            </div>
+        </div>
+    </section>
+
+    
+
+    <footer class="footer">
+        <p>📞 +1 323-913-4698 | 📧 info@hms.edu | 📸 Instagram</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function fetchNotifications() {
+            fetch("/get_notifications")
+                .then(response => response.json())
+                .then(data => {
+                    let notificationsContainer = document.getElementById("notifications");
+                    notificationsContainer.innerHTML = "";
+                    if (data.length === 0) {
+                        notificationsContainer.innerHTML = "<p>No notifications available.</p>";
+                    } else {
+                        data.forEach(notification => {
+                            let notifDiv = document.createElement("div");
+                            notifDiv.className = "notification";
+                            notifDiv.style.background = "#007bff";
+                            notifDiv.style.color = "white";
+                            notifDiv.style.padding = "10px";
+                            notifDiv.style.margin = "5px 0";
+                            notifDiv.style.borderRadius = "5px";
+                            notifDiv.innerHTML = `<strong>📢 Notification:</strong> ${notification.message}`;
+                            notificationsContainer.appendChild(notifDiv);
+                        });
+                    }
+                })
+                .catch(error => console.error("❌ Error fetching notifications:", error));
+        }
+        window.onload = () => {
+            fetchNotifications();
+            setInterval(fetchNotifications, 5000);
+        };
+    </script>
+</body>
+
+</html>
