@@ -43,35 +43,33 @@
     <div class="container">
         <h3>Add New Room</h3>
 
-        <label for="gender">select your gender:</label>
+        <label for="gender">Select Gender:</label>
         <select id="gender" onchange="updateHostelOptions()">
             <option value="" disabled selected>Select Gender</option>
             <option value="Female">Female</option>
             <option value="Male">Male</option>
         </select>
-        
-        <label for="hostel">select your gender:</label>
+
+        <label for="hostel">Select Hostel:</label>
         <select id="hostel">
             <option value="" disabled selected>Select Hostel</option>
         </select>
 
-        <label for="roomType">select your gender:</label>
+        <label for="roomNumber">Room Number:</label>
         <input type="text" id="roomNumber" placeholder="Enter Room Number">
+
+        <label for="roomType">Room Type:</label>
         <select id="roomType">
             <option value="" disabled selected>Select Room Type</option>
             <option value="2">2 Sharing</option>
             <option value="3">3 Sharing</option>
             <option value="4">8 Sharing</option>
         </select>
+
         <button onclick="addRoom()">Add Room</button>
         <p id="addMessage"></p>
+    </div>
 
-        <!-- <h3>Delete Room</h3>
-        <input type="text" id="deleteRoomNumber" placeholder="Enter Room Number">
-        <button onclick="deleteRoom()">Delete Room</button>
-        <p id="deleteMessage"></p> -->
-
-        <!-- DELETE ROOM SECTION -->
     <div class="container">
         <h3>Delete Room</h3>
 
@@ -87,10 +85,10 @@
             <option value="" disabled selected>Select Hostel</option>
         </select>
 
-        <label for="deleteRoomNumber">Enter Room Number:</label>
+        <label for="deleteRoomNumber">Room Number:</label>
         <input type="text" id="deleteRoomNumber" placeholder="Enter Room Number">
 
-        <label for="deleteRoomType">Select Room Type:</label>
+        <label for="deleteRoomType">Room Type:</label>
         <select id="deleteRoomType">
             <option value="" disabled selected>Select Room Type</option>
             <option value="2">2 Sharing</option>
@@ -98,10 +96,8 @@
             <option value="4">8 Sharing</option>
         </select>
 
-        <button class="delete-btn" onclick="deleteRoom()">Delete Room</button>
+        <button onclick="deleteRoom()">Delete Room</button>
         <p id="deleteMessage"></p>
-    </div>
-        <a href="/main">Go to Dashboard</a>
     </div>
 
     <script>
@@ -163,12 +159,7 @@
                 .then(data => {
                     document.getElementById("addMessage").innerText = data.message;
                     alert(data.message);
-
-                    // Clear input fields after submission
-                    document.getElementById("gender").selectedIndex = 0;
-                    document.getElementById("hostel").innerHTML = '<option value="" disabled selected>Select Hostel</option>';
-                    document.getElementById("roomNumber").value = "";
-                    document.getElementById("roomType").selectedIndex = 0;
+                    clearForm();
                 })
                 .catch(error => console.error("Error:", error));
             } else {
@@ -176,53 +167,47 @@
             }
         }
 
-//Deleting Rooms
-function deleteRoom() {
-    const gender = document.getElementById("deleteGender").value;
-    const hostel = document.getElementById("deleteHostel").value;
-    const roomNumber = document.getElementById("deleteRoomNumber").value;
-    const roomType = document.getElementById("deleteRoomType").value;
-    const messageContainer = document.getElementById("deleteMessage"); // Get message container
+        function deleteRoom() {
+            const gender = document.getElementById("deleteGender").value;
+            const hostel = document.getElementById("deleteHostel").value;
+            const roomNumber = document.getElementById("deleteRoomNumber").value;
+            const roomType = document.getElementById("deleteRoomType").value;
+            const messageContainer = document.getElementById("deleteMessage");
 
-    if (!gender || !hostel || !roomNumber || !roomType) {
-        alert("Please fill all details before deleting.");
-        return;
-    }
+            if (!gender || !hostel || !roomNumber || !roomType) {
+                alert("Please fill all details before deleting.");
+                return;
+            }
 
-    const requestData = { gender, hostel, roomNumber, roomType };
+            const requestData = { gender, hostel, roomNumber, roomType };
 
-    fetch("/delete_room", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            messageContainer.style.color = "red";  // Show error in red
-            messageContainer.innerText = data.error;
-            alert(data.error);  // Show popup alert for error
-        } else {
-            const successMessage = `Room ${roomNumber} deleted successfully in ${hostel}!`;
-
-            messageContainer.style.color = "green";  // Show success in green
-            messageContainer.innerText = successMessage;
-            alert(successMessage);  // Show popup alert for success
-
-            // Optionally clear form fields
-            document.getElementById("deleteGender").selectedIndex = 0;
-            document.getElementById("deleteHostel").innerHTML = '<option value="" disabled selected>Select Hostel</option>';
-            document.getElementById("deleteRoomNumber").value = "";
-            document.getElementById("deleteRoomType").selectedIndex = 0;
+            fetch("/delete_room", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    messageContainer.style.color = "red";
+                    messageContainer.innerText = data.error;
+                } else {
+                    const successMessage = `Room ${roomNumber} deleted successfully in ${hostel}!`;
+                    messageContainer.style.color = "green";
+                    messageContainer.innerText = successMessage;
+                    alert(successMessage);
+                    clearForm();
+                }
+            })
+            .catch(error => console.error("Error:", error));
         }
-    })
-    .catch(error => {
-        console.error("Error deleting room:", error);
-        messageContainer.style.color = "red";
-        messageContainer.innerText = "An error occurred while deleting the room.";
-        alert("An error occurred while deleting the room.");  // Show error popup
-    });
-}
+
+        function clearForm() {
+            document.getElementById("gender").selectedIndex = 0;
+            document.getElementById("hostel").innerHTML = '<option value="" disabled selected>Select Hostel</option>';
+            document.getElementById("roomNumber").value = "";
+            document.getElementById("roomType").selectedIndex = 0;
+        }
     </script>
 </body>
 </html>

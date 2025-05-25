@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-       <style>
         /* General Styles */
         body {
             font-family: 'Poppins', sans-serif;
@@ -42,27 +41,37 @@
         }
 
         .navbar .btn-signup {
-            background:  #007bff;
+            background: #007bff;
         }
 
         .navbar .btn-signup:hover {
-            background:  #007bff;
+            background: #007bff;
+        }
+
+        .navbar .btn-contact-us {
+            background: #f09c42;
+        }
+
+        .navbar .btn-contact-us:hover {
+            background: #e57d24;
         }
 
         /* Hero Section Styles */
         .hero {
-            background: linear-gradient(135deg,  #007bff, #000428);
+            background: linear-gradient(135deg, #007bff, #000428);
             height: 80vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             color: white;
+            position: relative;
         }
 
         .hero h1 {
             font-size: 3rem;
             font-weight: bold;
+            animation: fadeIn 1.5s ease-out;
         }
 
         .hero p {
@@ -89,11 +98,17 @@
             border-radius: 15px;
             overflow: hidden;
             padding: 20px;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .card:hover {
             transform: translateY(-10px);
+            box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Hover Effect on Cards */
+        .card:hover {
+            background-color: #f8f9fa;
         }
 
         /* Footer Styles */
@@ -103,20 +118,62 @@
             padding: 20px 0;
             text-align: center;
         }
+
+        /* Notifications */
+        .notification-card {
+            background: #007bff;
+            color: white;
+            padding: 18px;
+            margin: 12px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 1.2rem;
+            animation: slideIn 1s ease-out;
+        }
+
+        /* Slide-in Animation */
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .notification-card strong {
+            font-size: 1.1rem;
+        }
+
+        /* Fade-in Animation for Hero */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
     </style>
 </head>
 
 <body>
+    <!-- Navbar Section -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">Shri Dharmastala Manjunatheshwar College of Engineering and Technology</a>
             <div class="ms-auto">
                 <button class="btn-custom btn-login" onclick="location.href='/login'">Login</button>
                 <button class="btn-custom btn-signup" onclick="location.href='/register'">Signup</button>
+                <button class="btn-custom btn-contact-us" onclick="location.href='/contact'">Contact Us</button>
             </div>
         </div>
     </nav>
 
+    <!-- Hero Section -->
     <section class="hero">
         <div class="text-center">
             <h1>Welcome to Our Hostel Management System 🏠</h1>
@@ -124,6 +181,7 @@
         </div>
     </section>
 
+    <!-- Facilities Section -->
     <section class="section container">
         <h2 class="text-center mb-4">Facilities Provided</h2>
         <div class="row text-center">
@@ -153,12 +211,14 @@
             </div>
         </div>
     </section>
-<!-- Notifications Section -->
-<section class="container mb-5">
-    <h2 class="text-center mb-4">📢 Latest Notifications</h2>
-    <div id="notifications"></div>
-</section>
 
+    <!-- Notifications Section -->
+    <section class="container mb-5">
+        <h2 class="text-center mb-4">📢 Latest Notifications</h2>
+        <div id="notifications"></div>
+    </section>
+
+    <!-- Hostel List Section -->
     <section class="section bg-light">
         <div class="container">
             <h2 class="text-center mb-4">List of Hostels</h2>
@@ -172,6 +232,7 @@
         </div>
     </section>
 
+    <!-- Our Team Section -->
     <section class="section container">
         <h2 class="text-center mb-4">Our Team</h2>
         <div class="row text-center">
@@ -190,10 +251,17 @@
         </div>
     </section>
 
-    
-
+    <!-- Footer Section -->
     <footer class="footer">
-        <p>📞 +1 323-913-4698 | 📧 info@hms.edu | 📸 Instagram</p>
+        📞 <a href="tel:+13239134698" style="text-decoration: none; color: inherit;">+1 323-913-4698</a> | 
+        📧 <a href="mailto:info@hms.edu" style="text-decoration: none; color: inherit;">info@hms.edu</a> | 
+        📸 <a href="https://www.instagram.com/hms" target="_blank" style="text-decoration: none; color: inherit;">Instagram</a>
+
+        <!-- Google Map Embed -->
+        <div class="mt-4">
+            <iframe src="https://www.google.com/maps/embed/v1/place?q=SDMCET+Dharwad&key=YOUR_GOOGLE_MAPS_API_KEY" 
+                    width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -209,12 +277,7 @@
                     } else {
                         data.forEach(notification => {
                             let notifDiv = document.createElement("div");
-                            notifDiv.className = "notification";
-                            notifDiv.style.background = "#007bff";
-                            notifDiv.style.color = "white";
-                            notifDiv.style.padding = "10px";
-                            notifDiv.style.margin = "5px 0";
-                            notifDiv.style.borderRadius = "5px";
+                            notifDiv.className = "notification-card";
                             notifDiv.innerHTML = `<strong>📢 Notification:</strong> ${notification.message}`;
                             notificationsContainer.appendChild(notifDiv);
                         });

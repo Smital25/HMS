@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Attendance Report</title>
+</head>
+<body>
+    <h2>Generate Attendance Report</h2>
+
+    <label>Start Date (DD-MM-YYYY):</label>
+    <input type="text" id="start_date" placeholder="e.g. 01-05-2025">
+    <br><br>
+
+    <label>End Date (DD-MM-YYYY):</label>
+    <input type="text" id="end_date" placeholder="e.g. 11-05-2025">
+    <br><br>
+
+    <button onclick="generateReport()">Generate Report</button>
+    <button onclick="downloadPDF()">Download PDF Report</button>
+
+    <br><br>
+    <div id="result"></div>
+
+    <script>
+        function generateReport() {
+            const start_date = document.getElementById("start_date").value;
+            const end_date = document.getElementById("end_date").value;
+
+            fetch('/generate_report/data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ start_date, end_date })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const resultDiv = document.getElementById("result");
+                if (data.status === "success") {
+                    let html = "<table border='1'><tr><th>Name</th><th>Student ID</th><th>Date</th><th>Time</th><th>Status</th></tr>";
+                    data.records.forEach(record => {
+                        html += `<tr>
+                                    <td>${record.student_name}</td>
+                                    <td>${record.student_id}</td>
+                                    <td>${record.date}</td>
+                                    <td>${record.time || 'N/A'}</td>
+                                    <td>${record.status}</td>
+                                </tr>`;
+                    });
+                    html += "</table>";
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerText = data.message;
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                document.getElementById("result").innerText = "An error occurred while generating the report.";
+            });
+        }
+
+        function downloadPDF() {
+            const start_date = document.getElementById("start_date").value;
+            const end_date = document.getElementById("end_date").value;
+
+            fetch('/generate_report/pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ start_date, end_date })
+            })
+            .then(response => {
+                if (response.ok) return response.blob();
+                return response.json().then(data => { throw new Error(data.message); });
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "Attendance_Report.pdf";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(err => alert("Error: " + err.message));
+        }
+    </script>
+</body>
+</html>

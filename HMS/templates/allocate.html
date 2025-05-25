@@ -1,222 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Allocate Rooms</title>
-    <style>
-        body {
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Room Allocation</title>
+  <style>
+  body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(to right, #007bff, #b1cfee);
-    color: white;
-    text-align: center;
     padding: 20px;
-}
+    background: #f4f6f8;
+    color: #333;
+  }
 
-.container {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    width: 400px;
-    margin: auto;
-    color: black;
-}
+  h2 {
+    margin-top: 20px;
+  }
 
-input, select, button {
-    width: 80%;
-    padding: 12px;
-    margin-top: 12px;
-    border: 2px solid #007bff;
-    border-radius: 6px;
+  select {
+    padding: 10px 15px;
+    margin: 10px;
     font-size: 16px;
-}
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    min-width: 200px;
+    transition: border 0.3s;
+  }
 
-select {
-    background: #f8f9fa;
-}
+  select:focus {
+    border-color: #007bff;
+    outline: none;
+  }
 
-button {
-    background: #007bff;
+  .room-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .room {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    line-height: 60px;
     color: white;
     font-weight: bold;
-    border: none;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s;
-}
+    transition: transform 0.2s ease;
+  }
 
-button:hover {
-    background: #cedbe9;
+  .room:hover {
     transform: scale(1.05);
-}
+  }
 
-a {
-    display: block;
-    margin-top: 15px;
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    transition: color 0.3s;
-}
+  .vacant { background-color: #28a745; }     /* Green */
+  .partial { background-color: #ffc107; }    /* Orange */
+  .full { background-color: #dc3545; cursor: not-allowed; } /* Red */
 
-a {
-    color: #131312;
-}
+  #modal, #overlay {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+  }
 
-    </style>
+  #overlay {
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    top: 0;
+    left: 0;
+  }
+
+  #modal {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -30%);
+    position: fixed;
+    width: 320px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  }
+
+  #studentList {
+    max-height: 140px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+  }
+
+  #studentList div {
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  input[type="text"] {
+    padding: 8px 10px;
+    margin: 8px 0;
+    width: 95%;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border 0.3s;
+  }
+
+  input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+
+  #modal button {
+    padding: 10px 15px;
+    margin: 8px 5px 0 0;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  #modal button:hover {
+    opacity: 0.9;
+  }
+
+  #addBtn { background-color: #007bff; color: white; }
+  #modal button:nth-child(3) { background-color: #ffc107; color: black; }
+  #modal button:nth-child(4) { background-color: #6c757d; color: white; }
+</style>
+
+
 </head>
 <body>
-    
-    <h2>Allocate Room</h2>
-    <div class="container">
-        <input type="text" id="studentName" placeholder="Student Name">
-        <input type="text" id="usn" placeholder="USN">
 
-        <!-- <label for="gender">:</label> -->
-        <select id="gender" title="Select Gender" aria-label="Select Gender" onchange="fetchAvailableHostels()">
-            <option value="" disabled selected>Select Gender</option>
-            <option value="Female">Female</option>
-            <option value="Male">Male</option>
-        </select>
+<h2>Select Hostel</h2>
+<select id="hostelSelect">
+  <option value="">Select</option>
+  <option value="Hemavati">Hemavati</option>
+  <option value="Sharavati">Sharavati</option>
+  <option value="Netravati">Netravati</option>
+  <option value="Shalmala">Shalmala</option>
+</select>
 
-        <!-- <label for="hostel">select your gender:</label> -->
-        <select id="hostel" title="Select Hostel" aria-label="Select Hostel" onchange="fetchAvailableRoomTypes()">
-            <option value="" disabled selected>Select Hostel</option>
-        </select>
+<h2>Select Sharing</h2>
+<select id="sharingSelect">
+  <option value="">Select</option>
+  <option value="2">2 Sharing</option>
+  <option value="3">3 Sharing</option>
+  <option value="8">8 Sharing</option>
+</select>
 
-        <!-- <label for="roomType">select your gender:</label> -->
-        <select id="roomType" title="Select Room Type" aria-label="Select Room Type" onchange="fetchAvailableRooms()">
-            <option value="" disabled selected>Select Room Type</option>
-        </select>
+<div class="room-grid" id="roomGrid"></div>
 
-        <!-- <label for="roomNumber">select your gender:</label> -->
-        <select id="roomNumber" title="Select Room Number" aria-label="Select Room Number">
-            <option value="" disabled selected>Select Room Number</option>
-        </select>
+<div id="overlay"></div>
+<div id="modal">
+  <h3>Room Details</h3>
+  <div id="studentList"></div>
 
-        <button onclick="allocateRoom()">Allocate</button>
-        <p id="message"></p>
-        <a href="/main">Go to Dashboard</a>
-    </div>
+  <h3>Allocate Student</h3>
+  <input type="text" id="studentName" placeholder="Name"><br>
+  <input type="text" id="studentUSN" placeholder="USN"><br>
+  <button id="addBtn" onclick="submitAllocation()">Add Student</button>
+  <button onclick="removeStudent()">Remove Student</button>
+  <button onclick="closeModal()">Cancel</button>
+</div>
 
-    <script>
-        // Fetch hostels based on gender selection
-        function fetchAvailableHostels() {
-            const gender = document.getElementById("gender").value;
-            const hostelSelect = document.getElementById("hostel");
+<script>
+let currentRoom = {}, sharing = 0;
 
-            hostelSelect.innerHTML = '<option value="" disabled selected>Select Hostel</option>';
+document.getElementById("sharingSelect").addEventListener("change", loadRooms);
+document.getElementById("hostelSelect").addEventListener("change", () => {
+  document.getElementById("roomGrid").innerHTML = '';
+});
 
-            let hostels = gender === "Female" ? ["Hemavati", "Sharavati"] : ["Narmada", "Shalmala"];
+function loadRooms() {
+  const hostel = document.getElementById("hostelSelect").value;
+  sharing = parseInt(document.getElementById("sharingSelect").value);
+  if (!hostel || !sharing) return;
 
-            hostels.forEach(hostel => {
-                let option = document.createElement("option");
-                option.value = hostel;
-                option.textContent = hostel;
-                hostelSelect.appendChild(option);
-            });
+  fetch(`/get_rooms?hostel=${hostel}&sharing=${sharing}`)
+    .then(res => res.json())
+    .then(data => {
+      const grid = document.getElementById("roomGrid");
+      grid.innerHTML = '';
+      data.rooms.forEach(room => {
+        const div = document.createElement("div");
+        div.className = "room";
+        div.innerText = room.room_number;
 
-            fetchAvailableRoomTypes();
+        if (room.students.length === 0) {
+          div.classList.add("vacant");
+        } else if (room.students.length < sharing) {
+          div.classList.add("partial");
+        } else {
+          div.classList.add("full");
+          div.title = "Room Full";
         }
 
-        // Fetch available room types for the selected hostel
-        function fetchAvailableRoomTypes() {
-            const hostel = document.getElementById("hostel").value;
-            const roomTypeSelect = document.getElementById("roomType");
+        div.onclick = () => {
+          currentRoom = { ...room, sharing };
+          openModal();
+        };
 
-            roomTypeSelect.innerHTML = '<option value="" disabled selected>Select Room Type</option>';
+        grid.appendChild(div);
+      });
+    });
+}
 
-            if (!hostel) return;
+function openModal() {
+  document.getElementById("overlay").style.display = "block";
+  document.getElementById("modal").style.display = "block";
+  updateStudentList();
 
-            fetch(`/get_room_types?hostel=${hostel}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                        return;
-                    }
-                    data.roomTypes.forEach(type => {
-                        let option = document.createElement("option");
-                        option.value = type;
-                        option.textContent = type + " Sharing";
-                        roomTypeSelect.appendChild(option);
-                    });
-                    fetchAvailableRooms(); // Fetch rooms after setting types
-                })
-                .catch(error => console.error("Error fetching room types:", error));
-        }
+  const isFull = currentRoom.students.length >= currentRoom.sharing;
+  document.getElementById("studentName").disabled = isFull;
+  document.getElementById("studentUSN").disabled = isFull;
+  document.getElementById("addBtn").disabled = isFull;
 
-        // Fetch available rooms based on selected room type
-        function fetchAvailableRooms() {
-            const hostel = document.getElementById("hostel").value;
-            const roomType = document.getElementById("roomType").value;
-            const roomNumberSelect = document.getElementById("roomNumber");
+  if (isFull) {
+    alert("Room is full. You can only view or remove students.");
+  }
+}
 
-            roomNumberSelect.innerHTML = '<option value="" disabled selected>Select Room Number</option>';
+function closeModal() {
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("modal").style.display = "none";
+  document.getElementById("studentName").value = '';
+  document.getElementById("studentUSN").value = '';
+}
 
-            if (!hostel || !roomType) return;
+function updateStudentList() {
+  const studentList = document.getElementById("studentList");
+  studentList.innerHTML = '';
+  currentRoom.students.forEach(student => {
+    const div = document.createElement("div");
+    div.innerText = `${student.name} (${student.usn})`;
+    studentList.appendChild(div);
+  });
+}
 
-            fetch(`/get_available_rooms?hostel=${hostel}&roomType=${roomType}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert("No available rooms for this room type.");
-                        return;
-                    }
+function submitAllocation() {
+  const name = document.getElementById("studentName").value.trim();
+  const usn = document.getElementById("studentUSN").value.trim();
+  if (!name || !usn) {
+    alert("Both fields required.");
+    return;
+  }
 
-                    let uniqueRooms = new Set(data.rooms);
-                    uniqueRooms.forEach(room => {
-                        let option = document.createElement("option");
-                        option.value = room;
-                        option.textContent = room;
-                        roomNumberSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error("Error fetching rooms:", error));
-        }
+  fetch("/allocate_room", {
+    method: "POST",
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      room_id: currentRoom._id,
+      name,
+      usn
+    })
+  })
+  .then(res => res.json().then(data => ({ status: res.status, body: data })))
+  .then(({ status, body }) => {
+    alert(body.message);
+    if (status === 200) {
+      closeModal();
+      loadRooms();
+    }
+  })
+  .catch(() => alert("Allocation failed."));
+}
 
-        // Allocate the room to a student
-        function allocateRoom() {
-            const name = document.getElementById("studentName").value;
-            const usn = document.getElementById("usn").value;
-            const gender = document.getElementById("gender").value;
-            const hostel = document.getElementById("hostel").value;
-            const roomType = document.getElementById("roomType").value;
-            const roomNumber = document.getElementById("roomNumber").value;
+function removeStudent() {
+  if (currentRoom.students.length === 0) {
+    alert("No students to remove.");
+    return;
+  }
 
-            if (name && usn && gender && hostel && roomType && roomNumber) {
-                fetch("/allocate_room", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        studentName: name,
-                        usn: usn,
-                        gender: gender,
-                        hostel: hostel,
-                        roomType: roomType,
-                        roomNumber: roomNumber
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        document.getElementById("message").innerText = data.message;
-                        alert(data.message);
-                        document.getElementById("studentName").value = "";
-                        document.getElementById("usn").value = "";
-                        document.getElementById("gender").selectedIndex = 0;
-                        document.getElementById("hostel").innerHTML = '<option value="" disabled selected>Select Hostel</option>';
-                        document.getElementById("roomType").innerHTML = '<option value="" disabled selected>Select Room Type</option>';
-                        document.getElementById("roomNumber").innerHTML = '<option value="" disabled selected>Select Room Number</option>';
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-            } else {
-                alert("Please fill all fields.");
-            }
-        }
-    </script>
+  const studentUSN = prompt("Enter the USN of the student to remove:");
+  if (!studentUSN) return;
+
+  fetch("/remove_student", {
+    method: "POST",
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      room_id: currentRoom._id,
+      usn: studentUSN
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    closeModal();
+    loadRooms();
+  })
+  .catch(() => alert("Failed to remove student."));
+}
+</script>
+
 </body>
 </html>

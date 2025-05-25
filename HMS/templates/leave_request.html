@@ -5,122 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leave Request</title>
     <style>
-        /* General Reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Body */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Poppins', sans-serif;
+            background-color: #eef2f3;
             color: #333;
-            line-height: 1.6;
-            margin: 20px;
         }
 
-        /* Form */
-        form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 0 auto;
-            width: 300px;
-        }
-
-        form input, form select, form textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        form button {
-            width: 100%;
-            padding: 10px;
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            padding: 15px;
             color: white;
-            background-color: #4CAF50;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
         }
 
-        form button:hover {
-            background-color: #45a049;
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .back-btn {
+            background: #ff4b5c;
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #d43f4f;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+            margin: 50px auto;
         }
 
         h2 {
-            color: #4CAF50;
-            text-align: center;
+            color: #007bff;
             margin-bottom: 20px;
         }
 
-        .error {
-            color: red;
-            margin-bottom: 10px;
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
         }
 
-        .success {
-            color: green;
-            margin-bottom: 10px;
+        textarea {
+            resize: none;
+            height: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div class="ms-auto">
-        <button class="btn-dashboard" onclick="location.href='/student_dashboard'">Back to Dashboard</button>
+    <div class="navbar">
+        <h2>Leave Request Form</h2>
+        <a href="/student_dashboard" class="back-btn">Back to Dashboard</a>
     </div>
-    <h2>Leave Request Form</h2>
-    <form method="POST" action="/leave_request">
-        <input type="hidden" id="student_id" name="student_id" value="{{ student_id }}">
-        <label for="room_id">Room ID:</label>
-        <input type="text" id="room_id" name="room_id" required><br><br>
-        
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" name="start_date" required><br><br>
-        
-        <label for="end_date">End Date:</label>
-        <input type="date" id="end_date" name="end_date" required><br><br>
-        
-        <label for="reason">Reason for Leave:</label>
-        <textarea id="reason" name="reason" required></textarea><br><br>
     
-        <button type="submit">Submit Leave Request</button>
-    </form>
+    <div class="container">
+        <h2>Leave Request Form</h2>
+        <form id="leaveForm" method="POST" action="/leave_request">
+            <input type="hidden" id="student_id" name="student_id" value="{{ student_id }}">
+            <input type="text" id="room_id" name="room_id" placeholder="Room ID" required>
+            <input type="date" id="start_date" name="start_date" required>
+            <input type="date" id="end_date" name="end_date" required>
+            <textarea id="reason" name="reason" placeholder="Reason for Leave" required></textarea>
+            <button type="submit">Submit Leave Request</button>
+        </form>
+    </div>
+    
     <script>
         document.getElementById("leaveForm").addEventListener("submit", function(event) {
             const roomId = document.getElementById("room_id").value.trim();
             const startDate = document.getElementById("start_date").value;
             const endDate = document.getElementById("end_date").value;
             const reason = document.getElementById("reason").value.trim();
-            const currentDate = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+            const currentDate = new Date().toISOString().split("T")[0];
 
-            // Validate Room ID (alphanumeric)
             if (!/^[a-zA-Z0-9]+$/.test(roomId)) {
                 alert("Room ID must be alphanumeric.");
                 event.preventDefault();
                 return;
             }
 
-            // Validate Start Date (not in the past)
             if (startDate < currentDate) {
                 alert("Start Date cannot be in the past.");
                 event.preventDefault();
                 return;
             }
 
-            // Validate End Date (not before Start Date)
             if (endDate < startDate) {
                 alert("End Date cannot be earlier than Start Date.");
                 event.preventDefault();
                 return;
             }
 
-            // Validate Reason (minimum 10 characters)
             if (reason.length < 10) {
                 alert("Reason for Leave must be at least 10 characters long.");
                 event.preventDefault();

@@ -5,6 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            padding: 15px;
+            color: white;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .logout-button, .leave-request-button {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .leave-request-button {
+            background-color: #28a745;
+        }
+
+        .logout-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .leave-request-button:hover {
+            background-color: #218838;
+        }
+
         .dashboard {
             max-width: 1100px;
             margin: 50px auto;
@@ -13,110 +58,75 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-    
-        h2 {
-            text-align: center;
+
+        h3 {
             color: #007bff;
-            font-size: 28px;
-            margin-bottom: 20px;
+            font-size: 24px;
         }
-    
+
+        .student-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .student-info p {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
-    
-        table, th, td {
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-    
+
         th, td {
-            padding: 12px 15px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
         }
-    
+
         th {
             background-color: #007bff;
             color: white;
         }
-    
+
         tr:nth-child(even) {
             background-color: #f2f2f2;
         }
-    
+
         tr:hover {
             background-color: #ddd;
         }
-    
-        .leave-requests {
-            margin-top: 30px;
-        }
-    
-        .leave-count {
-            margin: 20px 0;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-    
-        .logout-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #f44336;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 30px;
-            text-align: center;
-        }
-    
-        .logout-button:hover {
-            background-color: #d32f2f;
-        }
-    
-        .card {
-            background-color: #fff;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            border-radius: 8px;
-        }
-    
-        .card h3 {
-            font-size: 22px;
-            color: #007bff;
-            margin-bottom: 10px;
-        }
-    
-        .card p {
-            font-size: 16px;
-            color: #555;
-        }
-    
-        .no-leave {
-            font-size: 18px;
-            color: #f44336;
-            text-align: center;
-            margin-top: 20px;
-        }
     </style>
-    
 </head>
 <body>
+    <div class="navbar">
+        <h2>Student Dashboard</h2>
+        <div class="navbar-buttons">
+            <a href="{{ url_for('leave_request') }}" class="leave-request-button">Send Leave Request</a>
+            <a href="{{ url_for('student_dashboard') }}" class="logout-button">Logout</a>
+        </div>
+    </div>
     
     <div class="dashboard">
-        <h2>Welcome to your Dashboard, {{ student['name'] }}</h2>
-
-        <h3>Your Information:</h3>
-        <p><strong>Student ID:</strong> {{ student['student_id'] }}</p>
-        <p><strong>Name:</strong> {{ student['name'] }}</p>
-        <p><strong>Contact Number:</strong> {{ student['contact_number'] }}</p>
-        <p><strong>Age:</strong> {{ student['age'] }}</p>
-        <p><strong>Gender:</strong> {{ student['gender'] }}</p>
-        <p><strong>Email:</strong> {{ student['email'] }}</p>
-        <p><strong>Date of Birth:</strong> {{ student['dob'] }}</p>
-        <p><strong>Address:</strong> {{ student['address'] }}</p>
+        <h3>Your Information</h3>
+        <div class="student-info">
+            <p><strong>Student ID:</strong> {{ student['student_id'] }}</p>
+            <p><strong>Name:</strong> {{ student['name'] }}</p>
+            <p><strong>Contact Number:</strong> {{ student['contact_number'] }}</p>
+            <p><strong>Age:</strong> {{ student['age'] }}</p>
+            <p><strong>Gender:</strong> {{ student['gender'] }}</p>
+            <p><strong>Email:</strong> {{ student['email'] }}</p>
+            <p><strong>Date of Birth:</strong> {{ student['dob'] }}</p>
+            <p><strong>Address:</strong> {{ student['address'] }}</p>
+        </div>
 
         <h3>Your Leave Requests (Total: {{ leave_count }})</h3>
         <table>
@@ -151,18 +161,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
-        <h3>Actions</h3>
-        <!-- Button to Apply for a Leave Letter -->
-        <a href="{{ url_for('leave_request') }}">
-            <button>Apply for Leave Letter</button>
-        </a>
-        <!-- Button to Send Leave Request -->
-        <!-- <a href="{{ url_for('send_leave_request') }}">
-            <button>Send Leave Request</button>
-        </a> -->
-        <!-- Button to logout -->
-        <a href="{{ url_for('student_dashboard') }}" class="logout-button">Logout</a>
     </div>
 </body>
 </html>

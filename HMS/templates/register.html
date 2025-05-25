@@ -6,160 +6,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Registration</title>
     <style>
-        /* Background Styling */
         body {
             font-family: Arial, sans-serif;
+            background-color: #e6f2ff;
             margin: 0;
             padding: 0;
-            background: #b6d3f3;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-y: auto;
         }
 
-        /* Main Container */
         .container {
-            width: 90%;
-            max-width: 500px;
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            text-align: center;
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
         }
 
-        /* Navbar */
         .navbar {
-            color: white; /* Set text color to white */
-    font-weight: bold;
-    font-size: 24px; /* Adjust size if needed */
-    width: 100%; /* Ensure full width */
-    background-color:#007bff;; /* Same as card */
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-radius: 8px 8px 0 0; /* Only top corners rounded */
-    margin: 0; /* Remove any margin */
-    box-sizing: border-box; /* Ensures proper width calculation */
-}
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #3399ff;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.2em;
+        }
 
-        /* Center Registration Form Text */
-        .navbar span {
-            font-size: 22px;
+        .home-button {
+            background-color: #ffffff;
+            color: #3399ff;
+            border: 2px solid #3399ff;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
             font-weight: bold;
         }
 
-        /* Home Button - Move to Right Side, Avoid Overlap */
-        /* Home Button Styling */
-.home-button {
-    position: absolute;
-    top: 10px; /* Positions it properly */
-    right: 15px; /* Aligns to the right */
-    background:#007bff;; /* Transparent background */
-    color: white;
-    padding: 5px 12px; /* Reduced padding to make it smaller */
-    width: auto; /* Adjust width automatically */
-    min-width: 80px; /* Ensures a smaller button */
-    border: 1px solid #007bff;; /* Subtle border */
-    border-radius: 4px;
-    font-size: 18px; /* Adjusted font size */
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease;
-}
+        .home-button:hover {
+            background-color: #3399ff;
+            color: #ffffff;
+        }
 
-/* Home Button Hover Effect */
-.home-button:hover {
-    background: rgba(255, 255, 255, 0.5);
-    transform: scale(1.05); /* Slight zoom on hover */
-}
-
-
-        /* Form Styling */
         form {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            width: 100%;
         }
 
-        /* Label Styling */
         label {
+            margin-top: 15px;
             font-weight: bold;
-            color: #007bff;
-            margin-top: 8px;
-            width: 100%;
-            text-align: left;
+            color: #0059b3;
         }
 
-        /* Input Fields */
         input, select, textarea {
-            width: 100%;
+            margin-top: 5px;
             padding: 10px;
-            margin-top: 4px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            outline: none;
+            border: 1px solid #99ccff;
+            border-radius: 5px;
+            background-color: #f0f8ff;
         }
 
-        /* Profile Photo Upload */
-        .profile-photo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #ddd;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            color: gray;
-            margin: 15px auto;
-            overflow: hidden;
-            cursor: pointer;
-            position: relative;
+        textarea {
+            resize: vertical;
         }
 
-        .profile-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        #photoUpload {
-            display: none;
-        }
-
-        /* Button Styling */
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            background-color: #007bff;
+        button[type="submit"] {
+            margin-top: 20px;
+            background-color: #3399ff;
             color: white;
-            font-size: 16px;
+            padding: 10px;
             border: none;
             border-radius: 6px;
+            font-size: 1em;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s ease;
         }
 
-        button:hover {
-            background-color: #007bff;;
+        button[type="submit"]:hover {
+            background-color: #007acc;
         }
 
-        /* Login Link */
         a {
             display: block;
             text-align: center;
-            margin-top: 15px;
-            color:#007bff;;
-            font-weight: bold;
+            margin-top: 20px;
+            color: #0059b3;
             text-decoration: none;
         }
 
@@ -167,6 +98,31 @@
             text-decoration: underline;
         }
 
+        .profile-photo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            border: 2px dashed #3399ff;
+            padding: 15px;
+            cursor: pointer;
+            color: #3399ff;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .profile-photo input {
+            display: none;
+        }
+
+        .profile-photo img {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
     </style>
 </head>
 
@@ -176,34 +132,31 @@
             <span>Registration Form</span>
             <button class="home-button" onclick="window.location.href='/'">🏠Home</button>
         </div>
-
-        <!-- Centered Profile Photo Upload -->
-        <label class="profile-photo" for="photoUpload">
-            <span id="photoText">Upload Photo</span>
-            <input type="file" id="photoUpload" accept="image/*" onchange="displayPhoto(event)">
-        </label>
-
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <label class="profile-photo" for="photoUpload">
+                <span id="photoText">Upload Photo</span>
+                <input type="file" id="photoUpload" accept="image/*" onchange="displayPhoto(event)">
+            </label>
             <label for="student_id">Student USN:</label>
             <input type="text" id="student_id" name="student_id" placeholder="Enter your USN" required>
 
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name"  placeholder="Enter your Name" required>
+            <input type="text" id="name" name="name" placeholder="Enter your Name" required>
 
             <label for="contact_number">Contact Number:</label>
-            <input type="text" id="contact_number" name="contact_number"  placeholder="Enter your Contact Number" required>
+            <input type="text" id="contact_number" name="contact_number" placeholder="Enter your Contact Number" required>
 
             <label for="dob">Date of Birth:</label>
-            <input type="date" id="dob" name="dob"  placeholder="Enter your Date of Birth" required>
+            <input type="date" id="dob" name="dob" placeholder="Enter your Date of Birth" required>
 
             <label for="age">Age:</label>
-            <input type="number" id="age" name="age"  placeholder="Enter your Age" required>
+            <input type="number" id="age" name="age" placeholder="Enter your Age" required>
 
             <label for="email">Email ID:</label>
-            <input type="email" id="email" name="email"  placeholder="Enter your Email" required>
+            <input type="email" id="email" name="email" placeholder="Enter your Email" required>
 
             <label for="gender">Gender:</label>
-            <select id="gender" name="gender"  placeholder="Enter your Gender" required>
+            <select id="gender" name="gender" required>
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -211,26 +164,26 @@
             </select>
 
             <label for="blood_group">Blood Group:</label>
-<select id="blood_group" name="blood_group"  placeholder="Enter your Blood Group" required>
-    <option value="">Select Blood Group</option>
-    <option value="O+">O+</option>
-    <option value="O-">O-</option>
-    <option value="A+">A+</option>
-    <option value="A-">A-</option>
-    <option value="B+">B+</option>
-    <option value="B-">B-</option>
-    <option value="AB+">AB+</option>
-    <option value="AB-">AB-</option>
-</select>
+            <select id="blood_group" name="blood_group" required>
+                <option value="">Select Blood Group</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+            </select>
 
             <label for="address">Address:</label>
-            <textarea id="address" name="address"  placeholder="Enter your Address" required></textarea>
+            <textarea id="address" name="address" placeholder="Enter your Address" required></textarea>
 
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username"  placeholder="Enter your Username" required>
+            <input type="text" id="username" name="username" placeholder="Enter your Username" required>
 
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password"  placeholder="Enter your Password" required>
+            <input type="password" id="password" name="password" placeholder="Enter your Password" required>
 
             <button type="submit">Register</button>
         </form>
@@ -252,6 +205,37 @@
                 };
                 reader.readAsDataURL(file);
             }
+        }
+
+        function validateForm() {
+            const contactNumber = document.getElementById('contact_number').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const photoUpload = document.getElementById('photoUpload').files[0];
+
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(contactNumber)) {
+                alert("Please enter a valid 10-digit phone number.");
+                return false;
+            }
+
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (!emailRegex.test(email)) {
+                alert("Please enter a valid email address.");
+                return false;
+            }
+
+            if (password.length < 6) {
+                alert("Password must be at least 6 characters long.");
+                return false;
+            }
+
+            if (!photoUpload) {
+                alert("Please upload a profile photo.");
+                return false;
+            }
+
+            return true;
         }
     </script>
 </body>
