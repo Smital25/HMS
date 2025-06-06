@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, jsonify,session,flash, send_from_directory
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,6 +13,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from email.mime.text import MIMEText
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from itsdangerous import URLSafeTimedSerializer
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 app = Flask(__name__, template_folder="templates")  # Ensure Flask finds HTML files
 CORS(app)
@@ -27,12 +32,27 @@ users_collection = db["users"]  # Correct collection name
 leave_requests_collection = db["leave_requests"]
 attendance_collection = db["attendance"]
 complaints_collection = db["complaint"]
+
+
+
 # Room capacity constraints
 ROOM_CAPACITY = {
     "2": 2,  # 2-sharing
     "3": 3,  # 3-sharing
     "8": 8   # 8-sharing
 }
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+app.secret_key = 'your_secret_key_here'
+serializer = URLSafeTimedSerializer(app.secret_key)
+
 ### **Frontend Routes (Render HTML Pages)** ###
 @app.route('/')
 def homepage():
@@ -83,6 +103,25 @@ def login():
 
     return render_template('login.html')
 
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password_simple():
+    if request.method == 'POST':
+        username = request.form['username']
+        new_password = request.form['new_password']
+        
+        user = users_collection.find_one({'username': username})
+        if user:
+            hashed_password = generate_password_hash(new_password)
+            users_collection.update_one({'username': username}, {'$set': {'password': hashed_password}})
+            flash('Password reset successfully. You can now log in.', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash('User not found.', 'danger')
+            return redirect(url_for('reset_password_simple'))
+    
+    return render_template('forgot.html')
+
 # Registration Route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -98,6 +137,12 @@ def register():
         username = request.form['username']
         password = request.form['password']
 
+        # ✅ Check if username already exists
+        existing_user = users_collection.find_one({'username': username})
+        if existing_user:
+            flash("Username already taken! Please choose another.", "danger")
+            return redirect(url_for('register'))
+
         hashed_password = generate_password_hash(password)
 
         users_collection.insert_one({
@@ -112,11 +157,19 @@ def register():
             'username': username,
             'password': hashed_password
         })
-        flash("Registration successful! Please login.")
+        flash("Registration successful! Please login.", "success")
         return redirect(url_for('login'))
 
     return render_template('register.html')
 
+
+@app.route('/student_info')
+def student_info():
+    if 'role' not in session or session['role'] != 'admin':
+        return redirect(url_for('login'))
+
+    students = list(users_collection.find())  # Fetch all users
+    return render_template('students_info.html', students=students)
 
 @app.route('/student_dashboard')
 def student_dashboard():
@@ -140,9 +193,13 @@ def main_dashboard():
 def view_rooms():
     return render_template("view.html")
 
-@app.route('/swap')
-def swap_rooms():
-    return render_template("swap.html")
+# @app.route('/swaps')
+# def swap_rooms():
+#     return render_template("swap.html")
+@app.route('/swap') 
+def swap_rooms(): 
+     return render_template("swap.html")
+
 
 @app.route('/manage')
 def manage_rooms():
@@ -152,14 +209,6 @@ def manage_rooms():
 @app.route('/logout')
 def logout():
     return redirect(url_for('homepage'))
-
-# @app.route('/main_attendance')
-# def main_attendance():
-#     return render_template("main_attendance.html")
-
-# @app.route('/notifications')
-# def notifications():
-#     return render_template("notification.html")
 
 # Admin Dashboard Route
 @app.route('/ladmin_dashboard')
@@ -252,39 +301,6 @@ def leave_request():
 # Generate Leave Request PDF
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-
-# def generate_leave_pdf(student_id, room_id, start_date, end_date, reason, pdf_path):
-#     try:
-#         c = canvas.Canvas(pdf_path, pagesize=letter)
-#         width, height = letter
-
-#         # Title of the letter
-#         c.setFont("Helvetica", 12)
-#         c.drawString(100, height - 100, "Leave Request Letter")
-#         c.line(100, height - 110, 500, height - 110)
-
-#         # Letter content
-#         c.drawString(100, height - 140, f"Student ID: {student_id}")
-#         c.drawString(100, height - 160, f"Room ID: {room_id}")
-#         c.drawString(100, height - 180, f"Leave Period: {start_date} to {end_date}")
-#         c.drawString(100, height - 200, f"Reason for Leave: {reason}")
-        
-#         # Formal tone
-#         c.drawString(100, height - 220, "Dear Sir/Madam,")
-#         c.drawString(100, height - 240, "I am a student from SDMCET,")
-#         c.drawString(100, height - 260, "asking you to please grant me leave for the following days.")
-#         c.drawString(100, height - 280, "I hope you will approve this leave request.")
-#         c.drawString(100, height - 300, "Thank you for your consideration.")
-        
-#         # Sign off
-#         c.drawString(100, height - 320, "Sincerely,")
-#         c.drawString(100, height - 340, f"Student ID: {student_id}")
-
-#         # Save the PDF
-#         c.save()
-
-#     except Exception as e:
-#         print(f"Error generating PDF: {e}")
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from datetime import datetime
@@ -477,41 +493,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 import secrets
 
-# Forgot Password Route
-@app.route('/forgot_password', methods=['GET', 'POST'])
-def forgot_password():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        user = users_collection.find_one({'email': email})
-        if user:
-            token = secrets.token_urlsafe(16)
-            users_collection.update_one({'email': email}, {'$set': {'reset_token': token}})
-            reset_link = url_for('reset_password', token=token, _external=True)
-            
-            msg = Message("Password Reset Request", recipients=[email])
-            msg.body = f"Click the link to reset your password: {reset_link}"
-            mail.send(msg)
-            flash("A password reset link has been sent to your email.")
-        else:
-            flash("Email not found.")
-    return render_template('forgot_password.html', title="Forgot Password")
 
-# Reset Password Route
-@app.route('/reset_password/<token>', methods=['GET', 'POST'])
-def reset_password(token):
-    user = users_collection.find_one({'reset_token': token})
-    if not user:
-        flash("Invalid or expired token.")
-        return redirect(url_for('forgot_password'))
-    
-    if request.method == 'POST':
-        new_password = request.form.get('new_password')
-        hashed_password = generate_password_hash(new_password)
-        users_collection.update_one({'reset_token': token}, {'$set': {'password': hashed_password}, '$unset': {'reset_token': ""}})
-        flash("Password reset successfully! Please log in.")
-        return redirect(url_for('login'))
-    
-    return render_template('reset_password.html', title="Reset Password")
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Example SMTP server, use your provider
@@ -595,7 +577,7 @@ def get_current_datetime():
 
 import subprocess
 
-HOSTEL_WIFI_SSID = "Mahadev"
+HOSTEL_WIFI_SSID = "Smiti"
 
 def is_connected_to_wifi():
     try:
@@ -610,7 +592,7 @@ def is_connected_to_wifi():
         print(f"WiFi check error: {e}")
         return False
 
-HOSTEL_WIFI_PREFIX = "Mahadev"  # Prefix of your hostel WiFi subnet
+HOSTEL_WIFI_PREFIX = "Smiti"  # Prefix of your hostel WiFi subnet
 
 def is_connected_to_hostel_wifi():
     try:
@@ -640,7 +622,7 @@ from datetime import datetime, time
 
 def is_within_allowed_time():
     now = datetime.now().time()
-    start_time = time(20, 0)   # 9:00 PM
+    start_time = time(21, 0)   # 9:00 PM
     end_time = time(22, 30)    # 10:30 PM
 
     return start_time <= now <= end_time
@@ -764,6 +746,11 @@ from fpdf import FPDF
 import io
 from datetime import datetime
 
+from flask import send_file, jsonify, request
+from datetime import datetime
+from fpdf import FPDF
+import io
+
 @app.route('/generate_report/pdf', methods=['POST'])
 def generate_pdf_report():
     data = request.get_json()
@@ -779,7 +766,6 @@ def generate_pdf_report():
     except ValueError:
         return jsonify({"status": "error", "message": "Invalid date format. Use DD-MM-YYYY."}), 400
 
-    # Format back to string to match MongoDB format
     start_str = start.strftime("%d-%m-%Y")
     end_str = end.strftime("%d-%m-%Y")
 
@@ -795,14 +781,32 @@ def generate_pdf_report():
     pdf.add_page()
     pdf.set_font("Arial", 'B', 14)
     pdf.cell(200, 10, txt="Attendance Report", ln=True, align='C')
-    pdf.set_font("Arial", size=10)
     pdf.ln(10)
 
-    for r in records:
-        line = f"Name: {r.get('student_name')} | ID: {r.get('student_id')} | Date: {r.get('date')} | Time: {r.get('time', 'N/A')} | Status: {r.get('status')}"
-        pdf.multi_cell(0, 10, line)
+    # Set up table headers
+    pdf.set_font("Arial", 'B', 10)
+    col_widths = [40, 25, 30, 30, 30]  # Adjust widths as needed
 
-    # Write PDF to memory
+    headers = ['Student Name', 'Student ID', 'Date', 'Time', 'Status']
+    for i, header in enumerate(headers):
+        pdf.cell(col_widths[i], 10, header, 1, 0, 'C')
+    pdf.ln()
+
+    # Table rows
+    pdf.set_font("Arial", '', 10)
+    for r in records:
+        row = [
+            r.get('student_name', 'N/A'),
+            r.get('student_id', 'N/A'),
+            r.get('date', 'N/A'),
+            r.get('time', 'N/A'),
+            r.get('status', 'N/A')
+        ]
+        for i, item in enumerate(row):
+            pdf.cell(col_widths[i], 10, str(item), 1, 0, 'C')
+        pdf.ln()
+
+    # Write to memory and send
     pdf_bytes = pdf.output(dest='S').encode('latin1')
     pdf_stream = io.BytesIO(pdf_bytes)
     pdf_stream.seek(0)
@@ -813,6 +817,7 @@ def generate_pdf_report():
         download_name='Attendance_Report.pdf',
         as_attachment=True
     )
+
 
 # complaints_collection = []
 
@@ -913,186 +918,6 @@ def delete_complaint(complaint_id):
         print(f"Error while deleting complaint: {e}")
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
-#  ## **🔹 API: Admin Adds a Room**
-# @app.route("/add_room", methods=["POST"])
-# def add_room():
-#     data = request.json
-#     gender = data.get("gender")
-#     hostel = data.get("hostel")
-#     room_number = str(data.get("roomNumber"))
-#     room_type = str(data.get("roomType"))
-
-#     if not gender or not hostel or not room_number or not room_type:
-#         return jsonify({"error": "Missing details"}), 400
-
-#     if rooms_collection.find_one({"roomNumber": room_number, "hostel": hostel}):
-#         return jsonify({"error": "Room already exists in this hostel!"}), 409
-
-#     rooms_collection.insert_one({"gender": gender, "hostel": hostel, "roomNumber": room_number, "roomType": room_type})
-#     return jsonify({"message": f"Room {room_number} added successfully in {hostel}!"}), 201
-
-# #Get room type
-# @app.route('/get_room_types', methods=['GET'])
-# def get_room_types():
-#     hostel = request.args.get("hostel")
-
-#     if not hostel:
-#         return jsonify({"error": "Missing hostel parameter"}), 400
-
-#     # Fetch distinct room types for the selected hostel
-#     room_types = sorted(set(str(room["roomType"]) for room in rooms_collection.find(
-#         {"hostel": hostel},
-#         {"_id": 0, "roomType": 1}
-#     ) if "roomType" in room))
-
-#     if not room_types:
-#         return jsonify({"error": "No available room types for this hostel."}), 404
-
-#     return jsonify({"roomTypes": room_types})
-
-# ### **🔹 API: Fetch Available Rooms**
-# @app.route('/get_available_rooms', methods=['GET'])
-# def get_available_rooms():
-#     hostel = request.args.get("hostel")
-#     room_type = str(request.args.get("roomType"))
-
-#     if not hostel or not room_type:
-#         return jsonify({"error": "Missing parameters"}), 400
-
-#     # Fetch all rooms of the requested type in the given hostel
-#     all_rooms = list(rooms_collection.find(
-#         {"roomType": room_type, "hostel": hostel},
-#         {"_id": 0, "roomNumber": 1}
-#     ))
-
-#     available_rooms = []
-#     for room in all_rooms:
-#         room_number = str(room["roomNumber"])
-#         allocated_students = allocations_collection.count_documents({"roomNumber": room_number})
-
-#         if allocated_students < ROOM_CAPACITY.get(room_type, 0):
-#             available_rooms.append(room_number)
-
-#     if not available_rooms:
-#         return jsonify({"error": "No available rooms"}), 404
-
-#     return jsonify({"rooms": available_rooms})
-
-# @app.route('/delete_room', methods=['POST'])
-# def delete_room():
-#     data = request.json
-#     print("Received delete request:", data)  # Debugging log
-
-#     # Ensure all required fields are present
-#     gender = data.get("gender")
-#     hostel = data.get("hostel")
-#     room_number = str(data.get("roomNumber"))
-#     room_type = str(data.get("roomType"))
-
-#     if not gender or not hostel or not room_number or not room_type:
-#         return jsonify({"error": "Missing details"}), 400
-
-#     # Find the room with matching details
-#     room = rooms_collection.find_one({
-#         "gender": gender, 
-#         "hostel": hostel, 
-#         "roomNumber": room_number, 
-#         "roomType": room_type
-#     })
-
-#     if not room:
-#         return jsonify({"error": "Room not found with the specified details"}), 404
-
-#     # Delete the room
-#     rooms_collection.delete_one({"_id": room["_id"]})
-
-#     # Print confirmation message
-#     print(f"Room {room_number} in {hostel} deleted successfully.")
-
-#     return jsonify({"message": f"Room {room_number} in {hostel} deleted successfully!"}), 200
-
-
-# ### **🔹 API: Admin Allocates Student to a Room**
-# @app.route('/allocate_room', methods=['POST'])
-# def allocate_room():
-#     data = request.json
-#     student_name = data.get("studentName")
-#     usn = data.get("usn")
-#     gender = data.get("gender")
-#     hostel = data.get("hostel")
-#     room_type = str(data.get("roomType"))
-#     room_number = str(data.get("roomNumber"))
-
-#     if not all([student_name, usn, gender, hostel, room_type, room_number]):
-#         return jsonify({"error": "Missing fields"}), 400
-
-#     room = rooms_collection.find_one({"roomNumber": room_number, "hostel": hostel})
-#     if not room:
-#         return jsonify({"error": "Room does not exist"}), 400
-
-#     allocated_students = allocations_collection.count_documents({"roomNumber": room_number})
-#     if allocated_students >= ROOM_CAPACITY.get(room_type, 0):
-#         return jsonify({"error": "Room is full!"}), 400
-
-#     allocations_collection.insert_one({
-#         "studentName": student_name,
-#         "usn": usn,
-#         "gender": gender,
-#         "hostel": hostel,
-#         "roomType": room_type,
-#         "roomNumber": room_number
-#     })
-
-#     return jsonify({"message": f"Room {room_number} allocated successfully for {student_name}"}), 201
-
-# #swap rooms
-# ### **🔹 API: Swap Rooms**
-# @app.route('/swap_rooms_request', methods=['POST'])
-# def swap_rooms_request():
-#     """Swaps rooms between two students if they exist."""
-#     data = request.json
-#     student1 = data.get("student1")
-#     student2 = data.get("student2")
-
-#     if not student1 or not student2:
-#         return jsonify({"error": "Missing student details"}), 400
-
-#     # Fetch students from the database
-#     student1_data = allocations_collection.find_one({"usn": student1["usn"], "roomNumber": student1["roomNumber"]})
-#     student2_data = allocations_collection.find_one({"usn": student2["usn"], "roomNumber": student2["roomNumber"]})
-
-#     if not student1_data:
-#         return jsonify({"error": f"Student {student1['name']} (USN: {student1['usn']}) not found in Room {student1['roomNumber']}"}), 404
-#     if not student2_data:
-#         return jsonify({"error": f"Student {student2['name']} (USN: {student2['usn']}) not found in Room {student2['roomNumber']}"}), 404
-
-#     # Swap room numbers
-#     allocations_collection.update_one(
-#         {"usn": student1["usn"]},
-#         {"$set": {"roomNumber": student2["roomNumber"]}}
-#     )
-#     allocations_collection.update_one(
-#         {"usn": student2["usn"]},
-#         {"$set": {"roomNumber": student1["roomNumber"]}}
-#     )
-
-#     # Store swap request for admin notification
-#     swap_requests_collection.insert_one({
-#         "student1": student1,
-#         "student2": student2,
-#         "status": "Pending Approval"
-#     })
-
-#     return jsonify({"message": f"Swap is successfully done for {student1['name']} and {student2['name']}.Thank you!"}), 200
-
-
-# @app.route('/get_allocations', methods=['GET'])
-# def get_allocations():
-#     """Fetches all allocated rooms from MongoDB."""
-#     allocations = list(allocations_collection.find({}, {"_id": 0, "studentName": 1, "usn": 1, "roomNumber": 1, "roomType": 1}))
-
-#     return jsonify(allocations)
-
 @app.route('/manage')
 def manage():
     return render_template("managerooms.html")
@@ -1153,59 +978,182 @@ def delete_room():
 
     return jsonify({"message": f"Room {room_number} deleted successfully!"})
 
-@app.route('/get_rooms', methods=['GET'])
+@app.route('/get_rooms')
 def get_rooms():
     hostel = request.args.get('hostel')
-    sharing = int(request.args.get('sharing'))
-    rooms = rooms_collection.find({"hostel": hostel, "sharing": sharing})
-    rooms_list = []
-    for room in rooms:
-        rooms_list.append({
-            "_id": str(room["_id"]),
-            "room_number": room["room_number"],
-            "students": room.get("students", [])
+    sharing = int(request.args.get('sharing', 0))
+
+    rooms_cursor = db['rooms'].find({'hostel': hostel, 'sharing': sharing})
+    result = []
+
+    for room in rooms_cursor:
+        room_number = room.get('room_number')
+        allocation = allocations_collection.find_one({'room_number': room_number})
+        students = allocation['students'] if allocation else []
+
+        result.append({
+            'room_number': room_number,
+            'students': students,
+            '_id': str(room['_id'])
         })
-    return jsonify({"rooms": rooms_list})
+
+    return jsonify({'rooms': result})
 
 @app.route('/allocate_room', methods=['POST'])
 def allocate_room():
     data = request.get_json()
-    room_id = data['room_id']
-    name = data['name']
-    usn = data['usn']
+    print("Received data:", data)
 
-    # Check if USN is already present in any room
-    existing = rooms_collection.find_one({"students.usn": usn})
-    if existing:
-        return jsonify({"message": f"This USN ({usn}) is already allocated to a room."}), 400
+    room_number = data.get('room_number') if data else None
+    name = data.get('name') if data else None
+    student_id = data.get('student_id') if data else None
 
-    room = rooms_collection.find_one({"_id": ObjectId(room_id)})
-    if not room:
-        return jsonify({"message": "Room not found."}), 404
+    print("room_number:", room_number)
+    print("name:", name)
+    print("student_id:", student_id)
 
-    if len(room.get('students', [])) >= room['sharing']:
-        return jsonify({"message": "Room is full."}), 400
+    if not (room_number and name and student_id):
+        return jsonify({'message': 'Missing data fields'}), 400
 
-    room['students'].append({"name": name, "usn": usn})
-    rooms_collection.update_one({"_id": ObjectId(room_id)}, {"$set": {"students": room['students']}})
-    return jsonify({"message": "Student allocated successfully."})
+    # Normalize inputs (strip spaces)
+    student_id = student_id.strip()
+    name = name.strip()
+    room_number = str(room_number).strip()
+
+    # Check if student is registered
+    registered_student = users_collection.find_one({'student_id': student_id})
+    print("Found registered student:", registered_student)
+
+    if not registered_student:
+        return jsonify({'message': 'Student is not registered'}), 400
+
+    if registered_student.get('name').strip() != name:
+        return jsonify({'message': 'Student name does not match registered data'}), 400
+
+    # Check if student already allocated to any room
+    allocation_exist = allocations_collection.find_one({'students.student_id': student_id})
+    if allocation_exist:
+        return jsonify({'message': 'Student already allocated in a room'}), 409
+
+    student_data = {'name': name, 'student_id': student_id}
+
+    # Find allocation document by room_number, or create new
+    allocation = allocations_collection.find_one({'room_number': room_number})
+
+    if allocation:
+        # Add student to existing room allocation
+        allocations_collection.update_one(
+            {'_id': allocation['_id']},
+            {'$push': {'students': student_data}}
+        )
+    else:
+        # Create new allocation for this room
+        new_allocation = {
+            'room_number': room_number,
+            'students': [student_data]
+        }
+        allocations_collection.insert_one(new_allocation)
+
+    return jsonify({'message': 'Student allocated successfully'}), 200
+
 
 @app.route('/remove_student', methods=['POST'])
 def remove_student():
     data = request.get_json()
-    room_id = data['room_id']
-    usn = data['usn']
-    
-    room = rooms_collection.find_one({"_id": ObjectId(room_id)})
-    if not room:
-        return jsonify({"message": "Room not found."}), 404
-    
-    # Find and remove the student by USN
-    students = room.get('students', [])
-    room['students'] = [student for student in students if student['usn'] != usn]
-    
-    rooms_collection.update_one({"_id": ObjectId(room_id)}, {"$set": {"students": room['students']}})
-    return jsonify({"message": "Student removed successfully."})
+    usn = data.get('usn')
+
+    if not usn:
+        return jsonify({'message': 'USN is required'}), 400
+
+    # Find the allocation that contains this student
+    allocation = allocations_collection.find_one({
+        'students': {'$elemMatch': {'usn': usn}}
+    })
+
+    if not allocation:
+        return jsonify({'message': 'Room allocation not found for this student'}), 404
+
+    # Remove the student from the students list
+    result = allocations_collection.update_one(
+        {'_id': allocation['_id']},
+        {'$pull': {'students': {'usn': usn}}}
+    )
+
+    if result.modified_count > 0:
+        return jsonify({'message': f'Student {usn} removed successfully'}), 200
+    else:
+        return jsonify({'message': 'Failed to remove student'}), 500
+
+
+
+@app.route('/swap_rooms_request', methods=['POST'])  # ✅ Match JS fetch route
+def handle_swap_rooms():
+    data = request.get_json()
+
+    student1 = data.get('student1')
+    student2 = data.get('student2')
+
+    if not student1 or not student2:
+        return jsonify({'error': 'Both student details are required'}), 400
+
+    usn1 = student1.get('usn')
+    usn2 = student2.get('usn')
+
+    # Find allocations for each student
+    allocation1 = allocations_collection.find_one({'students': {'$elemMatch': {'usn': usn1}}})
+    allocation2 = allocations_collection.find_one({'students': {'$elemMatch': {'usn': usn2}}})
+
+    if not allocation1 or not allocation2:
+        return jsonify({'error': 'One or both students not found in allocations'}), 404
+
+    # Get the actual student objects
+    s1 = next((s for s in allocation1['students'] if s['usn'] == usn1), None)
+    s2 = next((s for s in allocation2['students'] if s['usn'] == usn2), None)
+
+    if not s1 or not s2:
+        return jsonify({'error': 'Student details missing in DB'}), 500
+
+    # Remove students from current rooms
+    allocations_collection.update_one(
+        {'_id': allocation1['_id']},
+        {'$pull': {'students': {'usn': usn1}}}
+    )
+    allocations_collection.update_one(
+        {'_id': allocation2['_id']},
+        {'$pull': {'students': {'usn': usn2}}}
+    )
+
+    # Add them to each other's rooms
+    allocations_collection.update_one(
+        {'_id': allocation1['_id']},
+        {'$push': {'students': s2}}
+    )
+    allocations_collection.update_one(
+        {'_id': allocation2['_id']},
+        {'$push': {'students': s1}}
+    )
+
+    return jsonify({'message': f'Successfully swapped {usn1} and {usn2}'}), 200
+
+
+
+
+@app.route('/delete_allocation', methods=['POST'])
+def delete_allocation():
+    data = request.get_json()
+    usn = data.get("usn")
+    room_number = data.get("roomNumber")
+
+    if not usn or not room_number:
+        return jsonify({"error": "Missing USN or Room Number"}), 400
+
+    result = allocations_collection.delete_one({"usn": usn, "room_number": room_number})
+
+    if result.deleted_count == 1:
+        return jsonify({"message": "Allocation deleted successfully."})
+    else:
+        return jsonify({"error": "Allocation not found."}), 404
+
 
 if __name__ == '__main__':
     app.run(debug=True)
