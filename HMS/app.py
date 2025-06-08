@@ -918,6 +918,69 @@ def delete_complaint(complaint_id):
         print(f"Error while deleting complaint: {e}")
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
+
+
+#------------------ add rooms
+# Endpoint: Add a new room
+@app.route("/add_room", methods=["POST"])
+def add_room():
+    data = request.get_json()
+    gender = data.get("gender")
+    hostel = data.get("hostel")
+    room_number = data.get("roomNumber")
+    room_type = int(data.get("roomType"))  # 2/3/8 sharing
+
+    if not (gender and hostel and room_number and room_type):
+        return jsonify({"message": "Missing fields"}), 400
+
+    # Check for existing room
+    existing = rooms_collection.find_one({
+        "room_number": room_number,
+        "hostel": hostel,
+        "sharing": room_type
+    })
+
+    if existing:
+        return jsonify({"message": "Room already exists"}), 400
+
+    room_doc = {
+        "gender": gender,
+        "hostel": hostel,
+        "room_number": room_number,
+        "sharing": room_type,
+        "students": []
+    }
+
+    rooms_collection.insert_one(room_doc)
+    return jsonify({"message": f"Room {room_number} added successfully in {hostel}."}), 200
+
+
+# Endpoint: Delete a room
+@app.route("/delete_room", methods=["POST"])
+def delete_room():
+    data = request.get_json()
+    gender = data.get("gender")
+    hostel = data.get("hostel")
+    room_number = data.get("roomNumber")
+    room_type = int(data.get("roomType"))
+
+    if not (gender and hostel and room_number and room_type):
+        return jsonify({"error": "Missing fields"}), 400
+
+    query = {
+        "room_number": room_number,
+        "hostel": hostel,
+        "sharing": room_type,
+        "gender": gender
+    }
+
+    result = rooms_collection.delete_one(query)
+
+    if result.deleted_count == 1:
+        return jsonify({"message": "Room deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Room not found"}), 404
+#------------------------------------
 @app.route('/manage')
 def manage():
     return render_template("managerooms.html")
@@ -926,233 +989,205 @@ def manage():
 def allocate():
     return render_template("allocate.html")
 
-@app.route('/add_room', methods=['POST'])
-def add_room():
-    data = request.get_json()
-    gender = data['gender']
-    hostel = data['hostel']
-    room_number = data['roomNumber']
-    sharing = int(data['roomType'])
 
-    # Check if room already exists
-    existing = rooms_collection.find_one({
-        "hostel": hostel,
-        "room_number": room_number,
-        "sharing": sharing
-    })
-
-    if existing:
-        return jsonify({"message": "Room already exists!"}), 200
-
-    # Insert new room into the database
-    rooms_collection.insert_one({
-        "hostel": hostel,
-        "room_number": room_number,
-        "sharing": sharing,
-        "students": []  # Initially, no students
-    })
-
-    return jsonify({"message": "Room added successfully!"})
-
-@app.route('/delete_room', methods=['POST'])
-def delete_room():
-    data = request.get_json()
-    hostel = data['hostel']
-    room_number = data['roomNumber']
-    sharing = int(data['roomType'])
-
-    # Check if room exists
-    room = rooms_collection.find_one({
-        "hostel": hostel,
-        "room_number": room_number,
-        "sharing": sharing
-    })
-
-    if not room:
-        return jsonify({"error": "Room not found!"}), 404
-
-    # Delete the room from the database
-    rooms_collection.delete_one({
-        "_id": room['_id']
-    })
-
-    return jsonify({"message": f"Room {room_number} deleted successfully!"})
-
-@app.route('/get_rooms')
+@app.route("/get_rooms", methods=["GET"])
 def get_rooms():
-    hostel = request.args.get('hostel')
-    sharing = int(request.args.get('sharing', 0))
+    hostel = request.args.get("hostel")
+    sharing = int(request.args.get("sharing"))
 
-    rooms_cursor = db['rooms'].find({'hostel': hostel, 'sharing': sharing})
-    result = []
+    rooms = list(rooms_collection.find({"hostel": hostel, "sharing": sharing}, {"_id": 0}))
+    return jsonify({"rooms": rooms})
 
-    for room in rooms_cursor:
-        room_number = room.get('room_number')
-        allocation = allocations_collection.find_one({'room_number': room_number})
-        students = allocation['students'] if allocation else []
 
-        result.append({
-            'room_number': room_number,
-            'students': students,
-            '_id': str(room['_id'])
-        })
-
-    return jsonify({'rooms': result})
-
-@app.route('/allocate_room', methods=['POST'])
+@app.route("/allocate_room", methods=["POST"])
 def allocate_room():
     data = request.get_json()
-    print("Received data:", data)
+    room_number = data.get("room_number")
+    usn = data.get("student_id")
 
-    room_number = data.get('room_number') if data else None
-    name = data.get('name') if data else None
-    student_id = data.get('student_id') if data else None
+    if not room_number or not usn:
+        return jsonify({"message": "Missing room number or student ID"}), 400
 
-    print("room_number:", room_number)
-    print("name:", name)
-    print("student_id:", student_id)
-
-    if not (room_number and name and student_id):
-        return jsonify({'message': 'Missing data fields'}), 400
-
-    # Normalize inputs (strip spaces)
-    student_id = student_id.strip()
-    name = name.strip()
-    room_number = str(room_number).strip()
-
-    # Check if student is registered
-    registered_student = users_collection.find_one({'student_id': student_id})
-    print("Found registered student:", registered_student)
-
+    # ✅ 1. Check if student is registered
+    registered_student = users_collection.find_one({"student_id": usn})
     if not registered_student:
-        return jsonify({'message': 'Student is not registered'}), 400
+        return jsonify({"message": "Student is not registered. Allocation denied."}), 403
 
-    if registered_student.get('name').strip() != name:
-        return jsonify({'message': 'Student name does not match registered data'}), 400
+    # ✅ 2. Check if student is already allocated in any room
+    existing_allocation = rooms_collection.find_one({"students.usn": usn})
+    if existing_allocation:
+        return jsonify({"message": f"Student is already allocated in room {existing_allocation['room_number']}."}), 409
 
-    # Check if student already allocated to any room
-    allocation_exist = allocations_collection.find_one({'students.student_id': student_id})
-    if allocation_exist:
-        return jsonify({'message': 'Student already allocated in a room'}), 409
+    # ✅ 3. Fetch the target room
+    room = rooms_collection.find_one({"room_number": room_number})
+    if not room:
+        return jsonify({"message": "Room not found"}), 404
 
-    student_data = {'name': name, 'student_id': student_id}
+    # ✅ 4. Check room capacity
+    if len(room["students"]) >= room["sharing"]:
+        return jsonify({"message": "Room is full"}), 400
 
-    # Find allocation document by room_number, or create new
-    allocation = allocations_collection.find_one({'room_number': room_number})
+    # ✅ 5. Get name from registered user
+    name = registered_student["name"]
 
-    if allocation:
-        # Add student to existing room allocation
-        allocations_collection.update_one(
-            {'_id': allocation['_id']},
-            {'$push': {'students': student_data}}
-        )
-    else:
-        # Create new allocation for this room
-        new_allocation = {
-            'room_number': room_number,
-            'students': [student_data]
-        }
-        allocations_collection.insert_one(new_allocation)
+    # ✅ 6. Allocate the student
+    rooms_collection.update_one(
+        {"room_number": room_number},
+        {"$push": {"students": {"name": name, "usn": usn}}}
+    )
 
-    return jsonify({'message': 'Student allocated successfully'}), 200
-
-
-@app.route('/remove_student', methods=['POST'])
-def remove_student():
-    data = request.get_json()
-    usn = data.get('usn')
-
-    if not usn:
-        return jsonify({'message': 'USN is required'}), 400
-
-    # Find the allocation that contains this student
-    allocation = allocations_collection.find_one({
-        'students': {'$elemMatch': {'usn': usn}}
+    allocations_collection.insert_one({
+        "room_number": room_number,
+        "name": name,
+        "usn": usn,
+        "hostel": room.get("hostel"),
+        "sharing": room.get("sharing")
     })
 
-    if not allocation:
-        return jsonify({'message': 'Room allocation not found for this student'}), 404
+    return jsonify({"message": "Student allocated successfully"}), 200
 
-    # Remove the student from the students list
-    result = allocations_collection.update_one(
-        {'_id': allocation['_id']},
-        {'$pull': {'students': {'usn': usn}}}
+
+@app.route("/remove_student", methods=["POST"])
+def remove_student():
+    data = request.get_json()
+    usn = data["usn"]
+    room_number = data["room_number"]
+    hostel = data["hostel"]
+
+    result = rooms_collection.update_one(
+        {"room_number": room_number, "hostel": hostel},
+        {"$pull": {"students": {"usn": usn}}}
     )
 
     if result.modified_count > 0:
-        return jsonify({'message': f'Student {usn} removed successfully'}), 200
-    else:
-        return jsonify({'message': 'Failed to remove student'}), 500
+        allocations_collection.delete_many({"usn": usn})
+        return jsonify({"message": "Student removed successfully"}), 200
+
+    return jsonify({"message": "Student not found"}), 404
 
 
-
-@app.route('/swap_rooms_request', methods=['POST'])  # ✅ Match JS fetch route
-def handle_swap_rooms():
+#--------------------------------------------------------------------
+@app.route("/swap_rooms_request", methods=["POST"])
+def swap_rooms_request():
     data = request.get_json()
-
-    student1 = data.get('student1')
-    student2 = data.get('student2')
-
-    if not student1 or not student2:
-        return jsonify({'error': 'Both student details are required'}), 400
-
-    usn1 = student1.get('usn')
-    usn2 = student2.get('usn')
-
-    # Find allocations for each student
-    allocation1 = allocations_collection.find_one({'students': {'$elemMatch': {'usn': usn1}}})
-    allocation2 = allocations_collection.find_one({'students': {'$elemMatch': {'usn': usn2}}})
-
-    if not allocation1 or not allocation2:
-        return jsonify({'error': 'One or both students not found in allocations'}), 404
-
-    # Get the actual student objects
-    s1 = next((s for s in allocation1['students'] if s['usn'] == usn1), None)
-    s2 = next((s for s in allocation2['students'] if s['usn'] == usn2), None)
+    s1 = data.get("student1")
+    s2 = data.get("student2")
 
     if not s1 or not s2:
-        return jsonify({'error': 'Student details missing in DB'}), 500
+        return jsonify({"error": "Missing student data"}), 400
 
-    # Remove students from current rooms
+    usn1, usn2 = s1["usn"], s2["usn"]
+    room1, hostel1 = s1["roomNumber"], s1["hostel"]
+    room2, hostel2 = s2["roomNumber"], s2["hostel"]
+    gender1, gender2 = s1["gender"], s2["gender"]
+
+    # ✅ Check same gender
+    if gender1 != gender2:
+        return jsonify({"error": "Swap allowed only between same gender"}), 403
+
+    # ✅ Check hostel gender restriction
+    male_hostels = {"Shamala", "Netravati", "Narmada"}
+    female_hostels = {"Sharavati", "Hemavati"}
+
+    if gender1 == "Male" and (hostel1 not in male_hostels or hostel2 not in male_hostels):
+        return jsonify({"error": "Invalid male hostel selection."}), 400
+    if gender1 == "Female" and (hostel1 not in female_hostels or hostel2 not in female_hostels):
+        return jsonify({"error": "Invalid female hostel selection."}), 400
+
+    # ✅ Check registration
+    if not users_collection.find_one({"student_id": usn1}) or not users_collection.find_one({"student_id": usn2}):
+        return jsonify({"error": "One or both students are not registered."}), 403
+
+    # ✅ Fetch rooms based on room number + hostel
+    room_doc_1 = rooms_collection.find_one({"room_number": room1, "hostel": hostel1})
+    room_doc_2 = rooms_collection.find_one({"room_number": room2, "hostel": hostel2})
+
+    if not room_doc_1 or not room_doc_2:
+        return jsonify({"error": "One or both rooms not found."}), 404
+
+    # ✅ Check students in correct rooms
+    student_in_room_1 = next((s for s in room_doc_1["students"] if s["usn"] == usn1), None)
+    student_in_room_2 = next((s for s in room_doc_2["students"] if s["usn"] == usn2), None)
+
+    if not student_in_room_1 or not student_in_room_2:
+        return jsonify({"error": "One or both students not found in claimed rooms."}), 400
+
+    # ✅ Perform swap
+    # Remove and push swapped students
+    rooms_collection.update_one(
+        {"room_number": room1, "hostel": hostel1},
+        {"$pull": {"students": {"usn": usn1}}}
+    )
+    rooms_collection.update_one(
+        {"room_number": room2, "hostel": hostel2},
+        {"$pull": {"students": {"usn": usn2}}}
+    )
+    rooms_collection.update_one(
+        {"room_number": room1, "hostel": hostel1},
+        {"$push": {"students": student_in_room_2}}
+    )
+    rooms_collection.update_one(
+        {"room_number": room2, "hostel": hostel2},
+        {"$push": {"students": student_in_room_1}}
+    )
+
+    # ✅ Update allocation records
     allocations_collection.update_one(
-        {'_id': allocation1['_id']},
-        {'$pull': {'students': {'usn': usn1}}}
+        {"usn": usn1},
+        {"$set": {"room_number": room2, "hostel": hostel2}}, upsert=True
     )
     allocations_collection.update_one(
-        {'_id': allocation2['_id']},
-        {'$pull': {'students': {'usn': usn2}}}
+        {"usn": usn2},
+        {"$set": {"room_number": room1, "hostel": hostel1}}, upsert=True
     )
 
-    # Add them to each other's rooms
-    allocations_collection.update_one(
-        {'_id': allocation1['_id']},
-        {'$push': {'students': s2}}
-    )
-    allocations_collection.update_one(
-        {'_id': allocation2['_id']},
-        {'$push': {'students': s1}}
-    )
+    return jsonify({"message": f"Room swap between {usn1} and {usn2} successful."}), 200
+#---------------------------------------------------------------------------------------------
+@app.route("/get_allocations", methods=["GET"])
+def get_allocations():
+    allocations = list(allocations_collection.find({}))
+    result = []
+    for alloc in allocations:
+        result.append({
+            "studentName": alloc.get("name", ""),              # <- name must be present
+            "usn": alloc.get("usn", ""),                        # <- usn must be present
+            "roomNumber": alloc.get("room_number", ""),         # <- must be string or int
+            "roomType": str(alloc.get("sharing", "")),          # <- this was possibly missing
+        })
+    return jsonify(result), 200
 
-    return jsonify({'message': f'Successfully swapped {usn1} and {usn2}'}), 200
 
-
-
-
-@app.route('/delete_allocation', methods=['POST'])
+@app.route("/delete_allocation", methods=["POST"])
 def delete_allocation():
     data = request.get_json()
     usn = data.get("usn")
     room_number = data.get("roomNumber")
 
     if not usn or not room_number:
-        return jsonify({"error": "Missing USN or Room Number"}), 400
+        return jsonify({"error": "Missing USN or room number"}), 400
 
-    result = allocations_collection.delete_one({"usn": usn, "room_number": room_number})
+    # Step 1: Find the allocation to get hostel
+    allocation = allocations_collection.find_one({"usn": usn, "room_number": room_number})
+    if not allocation:
+        return jsonify({"error": "Allocation not found"}), 404
 
-    if result.deleted_count == 1:
-        return jsonify({"message": "Allocation deleted successfully."})
-    else:
-        return jsonify({"error": "Allocation not found."}), 404
+    hostel = allocation.get("hostel")
+    if not hostel:
+        return jsonify({"error": "Hostel info missing in allocation record"}), 500
+
+    # Step 2: Remove student from the room
+    result = rooms_collection.update_one(
+        {"room_number": room_number, "hostel": hostel},
+        {"$pull": {"students": {"usn": usn}}}
+    )
+
+    # Step 3: Delete from allocations
+    allocations_collection.delete_one({"usn": usn})
+
+    return jsonify({"message": f"Student {usn} removed from room {room_number}."}), 200
+
+
+
 
 
 if __name__ == '__main__':
