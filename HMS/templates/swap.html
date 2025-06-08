@@ -1,83 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Swap Rooms</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 350px;
-            margin: auto;
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Swap Rooms</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 370px;
+      margin: auto;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      cursor: pointer;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    p#message {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+    a {
+      display: block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #007bff;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-    <h2>Swap Room</h2>
-    <div class="container">
-        <h3>Student 1 Details</h3>
-        <input type="text" id="roomNumber1" placeholder="Room Number for Student 1">
-        <input type="text" id="student1" placeholder="Student 1 Name">
-        <input type="text" id="usn1" placeholder="Student 1 USN">
-        <hr>
-        <h3>Student 2 Details</h3>
-        <input type="text" id="roomNumber2" placeholder="Room Number for Student 2">
-        <input type="text" id="student2" placeholder="Student 2 Name">
-        <input type="text" id="usn2" placeholder="Student 2 USN">
-        <button onclick="swapRoom()">Swap Rooms</button>
-        <p id="message"></p>
-        <a href="/main">Go to Dashboard</a>
-    </div>
+  <h2>Swap Room Request</h2>
+  <div class="container">
+    <form id="swapForm">
+      <h3>Student 1 Details</h3>
+      <input type="text" id="roomNumber1" placeholder="Room Number (e.g., 201)" required />
+      <input type="text" id="student1" placeholder="Full Name" required />
+      <input type="text" id="usn1" placeholder="Student USN" required />
+      <select id="gender1" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <select id="hostel1" required>
+        <option value="" disabled selected>Select Hostel</option>
+      </select>
 
-    <script>
-        function swapRoom() {
-            const roomNumber1 = document.getElementById("roomNumber1").value;
-            const student1 = document.getElementById("student1").value;
-            const usn1 = document.getElementById("usn1").value;
-            
-            const roomNumber2 = document.getElementById("roomNumber2").value;
-            const student2 = document.getElementById("student2").value;
-            const usn2 = document.getElementById("usn2").value;
+      <hr />
 
-            if (!roomNumber1 || !roomNumber2 || !student1 || !student2 || !usn1 || !usn2) {
-                alert("Please fill in all fields.");
-                return;
-            }
+      <h3>Student 2 Details</h3>
+      <input type="text" id="roomNumber2" placeholder="Room Number (e.g., 301)" required />
+      <input type="text" id="student2" placeholder="Full Name" required />
+      <input type="text" id="usn2" placeholder="Student USN" required />
+      <select id="gender2" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <select id="hostel2" required>
+        <option value="" disabled selected>Select Hostel</option>
+      </select>
 
-            fetch("/swap_rooms_request", {  // ✅ Correct route
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    student1: { name: student1, usn: usn1, roomNumber: roomNumber1 },
-                    student2: { name: student2, usn: usn2, roomNumber: roomNumber2 }
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    document.getElementById("message").innerText = data.error;
-                } else {
-                    alert(data.message);
-                    document.getElementById("message").innerText = data.message;
-                }
-            })
-            .catch(error => console.error("Error:", error));
+      <button type="submit">Submit Swap Request</button>
+    </form>
+    <p id="message"></p>
+    <a href="/main">← Go to Dashboard</a>
+  </div>
+
+  <script>
+    const hostelOptions = {
+      Male: ["Shamala", "Netravati", "Narmada"],
+      Female: ["Hemavati", "Sharavati"]
+    };
+
+    function updateHostelOptions(genderId, hostelId) {
+      const gender = document.getElementById(genderId).value;
+      const hostelSelect = document.getElementById(hostelId);
+      hostelSelect.innerHTML = '<option value="" disabled selected>Select Hostel</option>';
+      if (hostelOptions[gender]) {
+        hostelOptions[gender].forEach(h => {
+          const opt = document.createElement("option");
+          opt.value = h;
+          opt.textContent = h;
+          hostelSelect.appendChild(opt);
+        });
+      }
+    }
+
+    document.getElementById("gender1").addEventListener("change", () => {
+      updateHostelOptions("gender1", "hostel1");
+    });
+
+    document.getElementById("gender2").addEventListener("change", () => {
+      updateHostelOptions("gender2", "hostel2");
+    });
+
+    document.getElementById("swapForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const s1 = {
+        roomNumber: document.getElementById("roomNumber1").value.trim(),
+        name: document.getElementById("student1").value.trim(),
+        usn: document.getElementById("usn1").value.trim(),
+        gender: document.getElementById("gender1").value,
+        hostel: document.getElementById("hostel1").value
+      };
+
+      const s2 = {
+        roomNumber: document.getElementById("roomNumber2").value.trim(),
+        name: document.getElementById("student2").value.trim(),
+        usn: document.getElementById("usn2").value.trim(),
+        gender: document.getElementById("gender2").value,
+        hostel: document.getElementById("hostel2").value
+      };
+
+      // Basic frontend validation
+      for (const [key, value] of Object.entries(s1).concat(Object.entries(s2))) {
+        if (!value) {
+          document.getElementById("message").textContent = "All fields must be filled.";
+          return;
         }
-    </script>
+      }
+
+      try {
+        const res = await fetch("/swap_rooms_request", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ student1: s1, student2: s2 }),
+        });
+
+        const result = await res.json();
+        document.getElementById("message").textContent = result.message || result.error;
+      } catch (err) {
+        document.getElementById("message").textContent = "Something went wrong.";
+      }
+    });
+  </script>
 </body>
 </html>
