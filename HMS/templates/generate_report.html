@@ -1,19 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Generate Attendance Report</title>
 </head>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f9faff;
+    margin: 40px;
+    color: #333;
+    text-align: center;
+  }
+
+  h2 {
+    color: #004c8c;
+    margin-bottom: 25px;
+  }
+
+  label {
+    font-weight: 600;
+    margin-right: 8px;
+  }
+
+  input[type="date"] {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    width: 180px;
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    padding: 10px 22px;
+    margin: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  #result {
+    margin-top: 30px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  }
+
+  table, th, td {
+    border: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    text-align: center;
+  }
+
+  td {
+    padding: 10px;
+    text-align: center;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f1f7ff;
+  }
+
+  tr:hover {
+    background-color: #d6e4ff;
+  }
+</style>
+
 <body>
     <h2>Generate Attendance Report</h2>
 
-    <label>Start Date (DD-MM-YYYY):</label>
-    <input type="text" id="start_date" placeholder="e.g. 01-05-2025">
+    <label>Start Date:</label>
+    <input type="date" id="start_date" />
     <br><br>
 
-    <label>End Date (DD-MM-YYYY):</label>
-    <input type="text" id="end_date" placeholder="e.g. 11-05-2025">
+    <label>End Date:</label>
+    <input type="date" id="end_date" />
     <br><br>
 
     <button onclick="generateReport()">Generate Report</button>
@@ -23,9 +105,21 @@
     <div id="result"></div>
 
     <script>
+        // Helper function to convert YYYY-MM-DD to DD-MM-YYYY
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const parts = dateString.split('-');
+            return parts[2] + '-' + parts[1] + '-' + parts[0];
+        }
+
         function generateReport() {
-            const start_date = document.getElementById("start_date").value;
-            const end_date = document.getElementById("end_date").value;
+            const start_date = formatDate(document.getElementById("start_date").value);
+            const end_date = formatDate(document.getElementById("end_date").value);
+
+            if (!start_date || !end_date) {
+                alert('Please select both start and end dates.');
+                return;
+            }
 
             fetch('/generate_report/data', {
                 method: 'POST',
@@ -59,8 +153,13 @@
         }
 
         function downloadPDF() {
-            const start_date = document.getElementById("start_date").value;
-            const end_date = document.getElementById("end_date").value;
+            const start_date = formatDate(document.getElementById("start_date").value);
+            const end_date = formatDate(document.getElementById("end_date").value);
+
+            if (!start_date || !end_date) {
+                alert('Please select both start and end dates.');
+                return;
+            }
 
             fetch('/generate_report/pdf', {
                 method: 'POST',
