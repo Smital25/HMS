@@ -1,192 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Room Allocation</title>
   <style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #f4f6f8;
-    color: #333;
-  }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f6f8;
+      color: #333;
+    }
 
-  h2 {
-    margin-top: 20px;
-  }
+    h2 {
+      margin-top: 20px;
+    }
 
-  select {
-    padding: 10px 15px;
-    margin: 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    min-width: 200px;
-    transition: border 0.3s;
-  }
+    select {
+      padding: 10px 15px;
+      margin: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      min-width: 200px;
+      transition: border 0.3s;
+    }
 
-  select:focus {
-    border-color: #007bff;
-    outline: none;
-  }
+    select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
 
-  .room-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-  }
+    .room-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
 
-  .room {
-    width: 60px;
-    height: 60px;
-    text-align: center;
-    line-height: 60px;
-    color: white;
-    font-weight: bold;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-  }
+    .room {
+      width: 60px;
+      height: 60px;
+      text-align: center;
+      line-height: 60px;
+      color: white;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
 
-  .room:hover {
-    transform: scale(1.05);
-  }
+    .room:hover {
+      transform: scale(1.05);
+    }
 
-  .vacant { background-color: #28a745; }     /* Green */
-  .partial { background-color: #ffc107; }    /* Orange */
-  .full { background-color: #dc3545; cursor: not-allowed; } /* Red */
+    .vacant { background-color: #28a745; }
+    .partial { background-color: #ffc107; }
+    .full { background-color: #dc3545; cursor: not-allowed; }
 
-  #modal, #overlay {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-  }
+    #modal, #overlay {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+    }
 
-  #overlay {
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.5);
-    top: 0;
-    left: 0;
-  }
+    #overlay {
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      top: 0;
+      left: 0;
+    }
 
-  #modal {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -30%);
-    position: fixed;
-    width: 320px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  }
+    #modal {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -30%);
+      position: fixed;
+      width: 320px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
 
-  #studentList {
-    max-height: 140px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-    background: #f9f9f9;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
-  }
+    #studentList {
+      max-height: 140px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+    }
 
-  #studentList div {
-    padding: 6px 10px;
-    margin-bottom: 6px;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+    #studentList div {
+      padding: 6px 10px;
+      margin-bottom: 6px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-  input[type="text"] {
-    padding: 8px 10px;
-    margin: 8px 0;
-    width: 95%;
-    font-size: 15px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    transition: border 0.3s;
-  }
+    input[type="text"] {
+      padding: 8px 10px;
+      margin: 8px 0;
+      width: 95%;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border 0.3s;
+    }
 
-  input[type="text"]:focus {
-    border-color: #007bff;
-    outline: none;
-  }
+    input[type="text"]:focus {
+      border-color: #007bff;
+      outline: none;
+    }
 
-  #modal button {
-    padding: 10px 15px;
-    margin: 8px 5px 0 0;
-    font-size: 14px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
+    #modal button {
+      padding: 10px 15px;
+      margin: 8px 5px 0 0;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
 
-  #modal button:hover {
-    opacity: 0.9;
-  }
+    #modal button:hover {
+      opacity: 0.9;
+    }
 
-  #addBtn { background-color: #007bff; color: white; }
-  #modal button:nth-child(3) { background-color: #ffc107; color: black; }
-  #modal button:nth-child(4) { background-color: #6c757d; color: white; }
-</style>
-
-
+    #addBtn { background-color: #007bff; color: white; }
+    #modal button:nth-child(3) { background-color: #ffc107; color: black; }
+    #modal button:nth-child(4) { background-color: #6c757d; color: white; }
+  </style>
 </head>
 <body>
 
-<h2>Select Hostel</h2>
-<select id="hostelSelect">
-  <option value="">Select</option>
-  <option value="Hemavati">Hemavati</option>
-  <option value="Sharavati">Sharavati</option>
-  <option value="Netravati">Netravati</option>
-  <option value="Shalmala">Shalmala</option>
-</select>
+  <h2>Select Gender</h2>
+  <select id="genderSelect" onchange="updateHostelOptions()">
+    <option value="">Select Gender</option>
+    <option value="Female">Female</option>
+    <option value="Male">Male</option>
+  </select>
 
-<h2>Select Sharing</h2>
-<select id="sharingSelect">
-  <option value="">Select</option>
-  <option value="2">2 Sharing</option>
-  <option value="3">3 Sharing</option>
-  <option value="8">8 Sharing</option>
-</select>
+  <h2>Select Hostel</h2>
+  <select id="hostelSelect" onchange="clearRooms()">
+    <option value="">Select Hostel</option>
+  </select>
 
-<div class="room-grid" id="roomGrid"></div>
+  <h2>Select Sharing</h2>
+  <select id="sharingSelect">
+    <option value="">Select</option>
+    <option value="2">2 Sharing</option>
+    <option value="3">3 Sharing</option>
+    <option value="8">8 Sharing</option>
+  </select>
 
-<div id="overlay"></div>
-<div id="modal">
-  <h3>Room Details</h3>
-  <div id="studentList"></div>
+  <div class="room-grid" id="roomGrid"></div>
 
-  <h3>Allocate Student</h3>
-  <input type="text" id="studentName" placeholder="Name"><br>
-  <input type="text" id="studentUSN" placeholder="USN"><br>
-  <button id="addBtn" onclick="submitAllocation()">Add Student</button>
-  <button onclick="removeStudent()">Remove Student</button>
-  <button onclick="closeModal()">Cancel</button>
-</div>
+  <div id="overlay"></div>
+  <div id="modal">
+    <h3>Room Details</h3>
+    <div id="studentList"></div>
+
+    <h3>Allocate Student</h3>
+    <input type="text" id="studentName" placeholder="Name"><br>
+    <input type="text" id="studentUSN" placeholder="USN"><br>
+    <button id="addBtn" onclick="submitAllocation()">Add Student</button>
+    <button onclick="removeStudent()">Remove Student</button>
+    <button onclick="closeModal()">Cancel</button>
+  </div>
 
 <script>
 let currentRoom = {}, sharing = 0;
 
 document.getElementById("sharingSelect").addEventListener("change", loadRooms);
-document.getElementById("hostelSelect").addEventListener("change", () => {
+document.getElementById("hostelSelect").addEventListener("change", loadRooms);
+
+function updateHostelOptions() {
+  const gender = document.getElementById("genderSelect").value;
+  const hostelSelect = document.getElementById("hostelSelect");
+
+  hostelSelect.innerHTML = '<option value="">Select Hostel</option>';
+
+  let hostels = [];
+  if (gender === "Female") {
+    hostels = ["Hemavati", "Sharavati"];
+  } else if (gender === "Male") {
+    hostels = ["Narmada", "Shalmala", "Netravati"];
+  }
+
+  hostels.forEach(hostel => {
+    const option = document.createElement("option");
+    option.value = hostel;
+    option.textContent = hostel;
+    hostelSelect.appendChild(option);
+  });
+
+  clearRooms();
+}
+
+function clearRooms() {
   document.getElementById("roomGrid").innerHTML = '';
-});
+}
 
 function loadRooms() {
   const hostel = document.getElementById("hostelSelect").value;
@@ -266,9 +292,9 @@ function submitAllocation() {
     method: "POST",
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      room_id: currentRoom._id,
-      name,
-      usn
+      room_number: currentRoom.room_number,
+      name: name,
+      student_id: usn
     })
   })
   .then(res => res.json().then(data => ({ status: res.status, body: data })))
@@ -281,6 +307,7 @@ function submitAllocation() {
   })
   .catch(() => alert("Allocation failed."));
 }
+
 
 function removeStudent() {
   if (currentRoom.students.length === 0) {
@@ -295,8 +322,9 @@ function removeStudent() {
     method: "POST",
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      room_id: currentRoom._id,
-      usn: studentUSN
+      usn: studentUSN,
+      room_number: currentRoom.room_number,              // ✅ MUST BE INCLUDED
+      hostel: document.getElementById("hostelSelect").value // ✅ ALSO REQUIRED
     })
   })
   .then(res => res.json())
@@ -307,6 +335,8 @@ function removeStudent() {
   })
   .catch(() => alert("Failed to remove student."));
 }
+
+
 </script>
 
 </body>
